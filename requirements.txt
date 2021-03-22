@@ -1,0 +1,10 @@
+easyAI
+funcy
+jupyter
+matplotlib
+networkx
+pygraphviz
+scipy
+
+isort
+black
