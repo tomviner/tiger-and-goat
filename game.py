@@ -1,9 +1,9 @@
-from easyAI import TwoPlayersGame, Human_Player, AI_Player, Negamax
+from easyAI import AI_Player, Human_Player, Negamax, TwoPlayersGame
 from funcy import collecting
 
-from graph import get_nodes
 from board import display
-from constants import TIGER_CHAR, TIGER_PLAYER, GOAT_PLAYER, NUM_GOATS
+from constants import GOAT_CHAR, GOAT_PLAYER, NUM_GOATS, TIGER_CHAR, TIGER_PLAYER
+from graph import get_nodes
 
 
 class TigerAndGoat(TwoPlayersGame):
@@ -20,28 +20,53 @@ class TigerAndGoat(TwoPlayersGame):
         self.place_tigers()
 
     def place_tigers(self):
-        self.pieces.update(
-            dict.fromkeys([(0, 0), (0, 4), (4, 0), (4, 4)], TIGER_CHAR)
-        )
+        self.pieces.update(dict.fromkeys([(0, 0), (0, 4), (4, 0), (4, 4)], TIGER_CHAR))
 
-    @property
     def tigers_go(self):
         return self.nplayer == TIGER_PLAYER
 
-    @property
     def goats_go(self):
         return self.nplayer == GOAT_PLAYER
 
+    def tiger_nodes(self):
+        return [self.nodes[pos] for pos, piece in self.pieces if piece == TIGER_CHAR]
+
+    def goat_nodes(self):
+        return [self.nodes[pos] for pos, piece in self.pieces if piece == GOAT_CHAR]
+
+    @collecting
+    def get_steps(self):
+        for tiger in self.tiger_nodes():
+            for dest in tiger.step_links:
+                if dest in self.empty():
+                    yield tiger.pos, dest
+
+    def tiger_steps(self):
+        return self.get_steps(self.tiger_nodes())
+
+    @collecting
+    def tiger_jumps(self):
+        for tiger in self.tiger_nodes():
+            for eaten, dest in tiger.jump_links:
+                if eaten in self.goat_nodes() and dest in self.empty():
+                    yield tiger.pos, dest
+
+    def goat_steps(self):
+        return self.get_steps(self.tiger_nodes())
+
+    def empty(self):
+        return set(self.nodes) - set(self.pieces.values())
+
     @collecting
     def possible_moves(self):
-        if self.tigers_go:
+        if self.tigers_go():
             yield from self.tiger_steps()
             yield from self.tiger_jumps()
         else:
             if self.goats_to_place:
                 yield from self.empty()
             else:
-                yield from self.tiger_steps()
+                yield from self.goat_steps()
 
     def make_move(self, move):
         self.pile -= int(move)  # remove bones.
