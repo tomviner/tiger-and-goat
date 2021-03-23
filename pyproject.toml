@@ -1,0 +1,8 @@
+[tool.black]
+skip-string-normalization = true
+target-version = ['py37']
+
+[tool.isort]
+profile = 'black'
+lines_after_imports = 2
+float_to_top = true
