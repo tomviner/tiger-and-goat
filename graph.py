@@ -28,11 +28,10 @@ class Node:
     def link_jump(self, eaten, other):
         self.jump_links.append((eaten, other))
         other.jump_links.append((eaten, self))
-        # self.graph.add_edge(self, eaten)
-        # self.graph.add_edge(other, eaten)
+        self.graph.add_edge(self, other)
 
     def __repr__(self):
-        return f"{self.x}, {self.y}"
+        return f"N({self.x}, {self.y})"
 
 
 def get_nodes():
@@ -51,33 +50,55 @@ def get_nodes():
         n3 = nodes[c]
         n1.link_jump(n2, n3)
 
+    # horizontal lines
     for y in range(5):
         for x1, x2 in pairwise(range(5)):
             link_step_nodes((x1, y), (x2, y))
         for x1, x2, x3 in triplewise(range(5)):
             link_jump_nodes((x1, y), (x2, y), (x3, y))
 
+    # vertical lines
     for x in range(5):
         for y1, y2 in pairwise(range(5)):
             link_step_nodes((x, y1), (x, y2))
+        for y1, y2, y3 in triplewise(range(5)):
+            link_jump_nodes((x, y1), (x, y2), (x, y3))
 
+    # corner to corner diagonal line: \
     for i1, i2 in pairwise(range(5)):
         link_step_nodes((i1, i1), (i2, i2))
+    for i1, i2, i3 in triplewise(range(5)):
+        link_jump_nodes((i1, i1), (i2, i2), (i3, i3))
 
+    # corner to corner diagonal line: /
     for i1, i2 in pairwise(range(5)):
         link_step_nodes((i1, 4 - i1), (i2, 4 - i2))
+    for i1, i2, i3 in triplewise(range(5)):
+        link_jump_nodes((i1, 4 - i1), (i2, 4 - i2), (i3, 4 - i3))
 
+    # bottom left: \
     for i1, i2 in pairwise(range(3)):
         link_step_nodes((i1 + 2, i1), (i2 + 2, i2))
+    for i1, i2, i3 in triplewise(range(3)):
+        link_jump_nodes((i1 + 2, i1), (i2 + 2, i2), (i3 + 2, i3))
 
+    # top right: \
     for i1, i2 in pairwise(range(3)):
         link_step_nodes((i1, i1 + 2), (i2, i2 + 2))
+    for i1, i2, i3 in triplewise(range(3)):
+        link_jump_nodes((i1, i1 + 2), (i2, i2 + 2), (i3, i3 + 2))
 
+    # top left: /
     for i1, i2 in pairwise(range(3)):
         link_step_nodes((i1, 2 - i1), (i2, 2 - i2))
+    for i1, i2, i3 in triplewise(range(3)):
+        link_jump_nodes((i1, 2 - i1), (i2, 2 - i2), (i3, 2 - i3))
 
+    # bottom right: /
     for i1, i2 in pairwise(range(3)):
         link_step_nodes((i1 + 2, 4 - i1), (i2 + 2, 4 - i2))
+    for i1, i2, i3 in triplewise(range(3)):
+        link_jump_nodes((i1 + 2, 4 - i1), (i2 + 2, 4 - i2), (i3 + 2, 4 - i3))
 
     display_graph(graph)
 

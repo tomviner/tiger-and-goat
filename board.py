@@ -1,3 +1,6 @@
+from constants import GOAT_CHAR
+
+
 BOARD = (
     '  ─  ─  ─  ─  \n'
     ' │╲ │╱ │╲ │╱ │\n'
@@ -11,7 +14,7 @@ BOARD = (
 )
 
 
-def display(pieces):
+def display(pieces, goats_to_place, goats_eaten):
     board = list(BOARD)
     dels = []
     for (x, y), piece in pieces.items():
@@ -22,4 +25,6 @@ def display(pieces):
     # remove from end, so indexes still make sense
     for n in sorted(dels, reverse=True):
         del board[n]
+    print(GOAT_CHAR * goats_to_place)
     print(''.join(board))
+    print(GOAT_CHAR * goats_eaten)
