@@ -1,10 +1,13 @@
 import re
 import time
+from collections import defaultdict
+from functools import lru_cache
 
 from easyAI import AI_Player, Human_Player, Negamax, TwoPlayersGame
-from funcy import collecting, joining
+from funcy import collecting, joining, post_processing
 
 from board import display
+from caching import cache
 from constants import (
     GOAT_CHAR,
     GOAT_PLAYER,
@@ -36,6 +39,42 @@ def coords_to_notation(coords):
         yield f'{col}{row}'
 
 
+@cache
+def apply_move(coords, pieces):
+    pieces = pieces.copy()
+    if len(coords) == 1:
+        pos = coords[0]
+        pieces[pos] = GOAT_CHAR
+    elif len(coords) == 2:
+        src, dest = coords
+        pieces[dest] = pieces.pop(src)
+    elif len(coords) == 3:
+        src, eaten, dest = coords
+        pieces[dest] = pieces.pop(src)
+        del pieces[eaten]
+    else:
+        raise ValueError(coords)
+    return pieces
+
+
+@cache
+def unapply_move(coords, pieces):
+    pieces = pieces.copy()
+    if len(coords) == 1:
+        pos = coords[0]
+        del pieces[pos]
+    elif len(coords) == 2:
+        src, dest = coords
+        pieces[src] = pieces.pop(dest)
+    elif len(coords) == 3:
+        src, eaten, dest = coords
+        pieces[src] = pieces.pop(dest)
+        pieces[eaten] = GOAT_CHAR
+    else:
+        raise ValueError(coords)
+    return pieces
+
+
 class TigerAndGoat(TwoPlayersGame):
     def __init__(self, players):
         self.players = players
@@ -45,6 +84,7 @@ class TigerAndGoat(TwoPlayersGame):
         self.nodes = get_nodes()
         self.pieces = {}
         self.place_tigers()
+        self.history = [self.pieces]
 
     def place_tigers(self):
         self.pieces.update(dict.fromkeys([(0, 0), (0, 4), (4, 0), (4, 4)], TIGER_CHAR))
@@ -68,22 +108,39 @@ class TigerAndGoat(TwoPlayersGame):
             self.nodes[pos] for pos, piece in self.pieces.items() if piece == GOAT_CHAR
         ]
 
+    def seen(self, coords):
+        if self.goats_to_place:
+            return False
+        new_pieces = apply_move(coords, self.pieces)
+        return new_pieces in self.history
+
     @collecting
     def get_steps(self, nodes):
         for node in nodes:
             for dest in node.step_links:
-                if dest.pos in self.empty():
-                    yield node.pos, dest.pos
+                if dest.pos not in self.pieces:
+                    coords = node.pos, dest.pos
+                    if not self.seen(coords):
+                        yield coords
 
     def tiger_steps(self):
         return self.get_steps(self.tiger_nodes())
 
     @collecting
     def tiger_jumps(self):
+        # from collections import Counter
+
+        # c = Counter()
         for tiger in self.tiger_nodes():
             for eaten, dest in tiger.jump_links:
-                if eaten in self.goat_nodes() and dest.pos in self.empty():
-                    yield tiger.pos, eaten.pos, dest.pos
+                if (
+                    self.pieces.get(eaten.pos) == GOAT_CHAR
+                    and dest.pos not in self.pieces
+                ):
+                    coords = tiger.pos, eaten.pos, dest.pos
+                    yield coords
+        #                 c[tiger.pos] += 1
+        # self.tigers_can_jump = sum(bool(count) for count in c.values())
 
     def mobile_tigers(self):
         # Todo: refactor this
@@ -92,11 +149,18 @@ class TigerAndGoat(TwoPlayersGame):
         c = Counter()
         for tiger in self.tiger_nodes():
             for eaten, dest in tiger.jump_links:
-                if eaten in self.goat_nodes() and dest.pos in self.empty():
+                if (
+                    self.pieces.get(eaten.pos) == GOAT_CHAR
+                    and dest.pos not in self.pieces
+                ):
+                    coords = tiger.pos, eaten.pos, dest.pos
+                    # if not self.seen(coords):
                     c[tiger] += 1
             for dest in tiger.step_links:
-                if dest.pos in self.empty():
-                    c[tiger] += 1
+                if dest.pos not in self.pieces:
+                    coords = tiger.pos, dest.pos
+                    if not self.seen(coords):
+                        c[tiger] += 1
         return sum(bool(count) for count in c.values())
 
     def goat_placements(self):
@@ -123,44 +187,20 @@ class TigerAndGoat(TwoPlayersGame):
 
     def make_move(self, notation):
         coords = notation_to_coords(notation)
+        self.pieces = apply_move(coords, self.pieces)
         if len(coords) == 1:
-            pos = coords[0]
-            assert pos in self.empty()
-            self.pieces[pos] = GOAT_CHAR
             self.goats_to_place -= 1
-        elif len(coords) == 2:
-            src, dest = coords
-            assert src not in self.empty()
-            assert dest in self.empty()
-            self.pieces[dest] = self.pieces.pop(src)
-        elif len(coords) == 3:
-            src, eaten, dest = coords
-            assert self.pieces[src] == TIGER_CHAR
-            assert self.pieces[eaten] == GOAT_CHAR
-            assert dest in self.empty()
-            self.pieces[dest] = self.pieces.pop(src)
-            del self.pieces[eaten]
-        else:
-            raise ValueError(coords)
+        self.history.append(self.pieces)
 
     def unmake_move(self, notation):
         coords = notation_to_coords(notation)
+        self.pieces = unapply_move(coords, self.pieces)
         if len(coords) == 1:
-            pos = coords[0]
-            del self.pieces[pos]
             self.goats_to_place += 1
-        elif len(coords) == 2:
-            src, dest = coords
-            self.pieces[src] = self.pieces.pop(dest)
-        elif len(coords) == 3:
-            src, eaten, dest = coords
-            self.pieces[src] = self.pieces.pop(dest)
-            self.pieces[eaten] = GOAT_CHAR
-        else:
-            raise ValueError(coords)
+        self.history.pop()
 
     def goats_eaten(self):
-        return NUM_GOATS - self.goats_to_place - len(self.goat_nodes())
+        return NUM_GOATS - self.goats_to_place - len(self.pieces) + 4
 
     def tiger_wins(self):
         return self.goats_eaten() >= NUM_EATEN_LOSE
@@ -177,20 +217,33 @@ class TigerAndGoat(TwoPlayersGame):
             print('5 goats eaten, TIGER WINS!')
         elif self.goat_wins():
             print('tiger cannot move, GOAT WINS!')
+        score = abs(self.scoring())
+        print('score:', score, 'x' * score)
+
+    @post_processing(coords_to_notation)
+    def serialize_pieces(self):
+        yield from sorted(node.pos for node in self.tiger_nodes())
+        yield from sorted(node.pos for node in self.goat_nodes())
 
     def scoring(self):
-        score = 2 * self.goats_eaten() + self.mobile_tigers()
+        mobile_tigers = self.mobile_tigers()
+
+        if self.goats_eaten() >= NUM_EATEN_LOSE:
+            score = 100
+        elif not mobile_tigers:
+            score = 0
+        else:
+            score = 10 * self.goats_eaten() + mobile_tigers
         if self.goats_go():
             score *= -1
         return score
 
 
 # Start a match (and store the history of moves when it ends)
-goat_ai = Negamax(4)
-tiger_ai = Negamax(2)
+goat_ai = Negamax(3)
+tiger_ai = Negamax(1)
 # [goat, tiger]
 game = TigerAndGoat([AI_Player(goat_ai), AI_Player(tiger_ai)])
-print(game)
 
 start = time.monotonic()
 history = game.play()
