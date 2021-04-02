@@ -8,3 +8,5 @@ scipy
 
 isort
 black
+flake8
+autoflake

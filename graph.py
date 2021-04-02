@@ -1,54 +1,33 @@
-import networkx as nx
-import pylab as plt
 from funcy import pairwise, partition
+
+from notations import coord_to_pos_num
 
 
 def triplewise(seq):
     return partition(3, 1, seq)
 
 
-class Node:
-    def __init__(self, x, y, graph):
-        self.x = x
-        self.y = y
-        self.pos = x, y
+def get_graphs():
+    graphs = {
+        'steps': {},
+        'jumps': {},
+    }
 
-        self.step_links = []
-        self.jump_links = []
+    def link(graph, a, b):
+        pos_num_1 = coord_to_pos_num(a)
+        pos_num_2 = coord_to_pos_num(b)
 
-        graph.add_node(self)
-        self.graph = graph
+        graph.setdefault(pos_num_1, [])
+        graph[pos_num_1].append(pos_num_2)
 
-    def link_step(self, other):
-        self.step_links.append(other)
-        other.step_links.append(self)
-        self.graph.add_edge(self, other)
-        self.graph.add_edge(other, self)
-
-    def link_jump(self, eaten, other):
-        self.jump_links.append((eaten, other))
-        other.jump_links.append((eaten, self))
-        self.graph.add_edge(self, other)
-
-    def __repr__(self):
-        return f"N({self.x}, {self.y})"
-
-
-def get_nodes():
-    graph = nx.MultiGraph()
-
-    nodes = {(x, y): Node(x, y, graph) for x in range(5) for y in range(5)}
+        graph.setdefault(pos_num_2, [])
+        graph[pos_num_2].append(pos_num_1)
 
     def link_step_nodes(a, b):
-        n1 = nodes[a]
-        n2 = nodes[b]
-        n1.link_step(n2)
+        link(graphs['steps'], a, b)
 
     def link_jump_nodes(a, b, c):
-        n1 = nodes[a]
-        n2 = nodes[b]
-        n3 = nodes[c]
-        n1.link_jump(n2, n3)
+        link(graphs['jumps'], a, c)
 
     # horizontal lines
     for y in range(5):
@@ -100,17 +79,4 @@ def get_nodes():
     for i1, i2, i3 in triplewise(range(3)):
         link_jump_nodes((i1 + 2, 4 - i1), (i2 + 2, 4 - i2), (i3 + 2, 4 - i3))
 
-    display_graph(graph)
-
-    return nodes
-
-
-def display_graph(graph):
-    plt.figure(figsize=(15, 10))
-
-    nx.draw(
-        graph,
-        with_labels=True,
-        node_color='white',
-        pos=nx.nx_agraph.graphviz_layout(graph),
-    )
+    return graphs

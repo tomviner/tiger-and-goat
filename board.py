@@ -1,7 +1,9 @@
 from constants import GOAT_CHAR
+from notations import pos_num_to_coord
 
 
 BOARD = (
+    ' A  B  C  D  E \n'
     '1  ─  ─  ─  ─  \n'
     '  │╲ │╱ │╲ │╱ │\n'
     '2  ─  ─  ─  ─  \n'
@@ -14,11 +16,12 @@ BOARD = (
 )
 
 
-def display(pieces, goats_to_place, goats_eaten):
+def display(pieces, goats_to_place=0, goats_eaten=0):
     board = list(BOARD)
     dels = []
-    for (x, y), piece in pieces.items():
-        n = 2 + (32 * y) + (3 * x)
+    for pos_num, piece in pieces.items():
+        x, y = pos_num_to_coord(pos_num)
+        n = 18 + (32 * y) + (3 * x)
         board[n] = piece
         # emoji take up 2 spaces in my terminal
         dels.append(n - 1)
@@ -26,6 +29,5 @@ def display(pieces, goats_to_place, goats_eaten):
     for n in sorted(dels, reverse=True):
         del board[n]
     print(GOAT_CHAR * goats_to_place)
-    print(' A  B  C  D  E')
     print(''.join(board))
     print(GOAT_CHAR * goats_eaten)
