@@ -1,82 +1,59 @@
-from funcy import pairwise, partition
-
-from notations import coord_to_pos_num
+"Compiled board move graphs using pos nums. See tests for how these were formed."
 
 
-def triplewise(seq):
-    return partition(3, 1, seq)
+STEPS_GRAPH = {
+    0: [1, 5, 6],
+    1: [0, 2, 6],
+    2: [1, 3, 7, 8, 6],
+    3: [2, 4, 8],
+    4: [3, 9, 8],
+    5: [6, 0, 10],
+    6: [5, 7, 1, 11, 0, 12, 10, 2],
+    7: [6, 8, 2, 12],
+    8: [7, 9, 3, 13, 12, 4, 2, 14],
+    9: [8, 4, 14],
+    10: [11, 5, 15, 16, 6],
+    11: [10, 12, 6, 16],
+    12: [11, 13, 7, 17, 6, 18, 16, 8],
+    13: [12, 14, 8, 18],
+    14: [13, 9, 19, 8, 18],
+    15: [16, 10, 20],
+    16: [15, 17, 11, 21, 20, 12, 10, 22],
+    17: [16, 18, 12, 22],
+    18: [17, 19, 13, 23, 12, 24, 22, 14],
+    19: [18, 14, 24],
+    20: [21, 15, 16],
+    21: [20, 22, 16],
+    22: [21, 23, 17, 16, 18],
+    23: [22, 24, 18],
+    24: [23, 19, 18],
+}
 
 
-def get_graphs():
-    graphs = {
-        'steps': {},
-        'jumps': {},
-    }
-
-    def link(graph, a, b):
-        pos_num_1 = coord_to_pos_num(a)
-        pos_num_2 = coord_to_pos_num(b)
-
-        graph.setdefault(pos_num_1, [])
-        graph[pos_num_1].append(pos_num_2)
-
-        graph.setdefault(pos_num_2, [])
-        graph[pos_num_2].append(pos_num_1)
-
-    def link_step_nodes(a, b):
-        link(graphs['steps'], a, b)
-
-    def link_jump_nodes(a, b, c):
-        link(graphs['jumps'], a, c)
-
-    # horizontal lines
-    for y in range(5):
-        for x1, x2 in pairwise(range(5)):
-            link_step_nodes((x1, y), (x2, y))
-        for x1, x2, x3 in triplewise(range(5)):
-            link_jump_nodes((x1, y), (x2, y), (x3, y))
-
-    # vertical lines
-    for x in range(5):
-        for y1, y2 in pairwise(range(5)):
-            link_step_nodes((x, y1), (x, y2))
-        for y1, y2, y3 in triplewise(range(5)):
-            link_jump_nodes((x, y1), (x, y2), (x, y3))
-
-    # corner to corner diagonal line: \
-    for i1, i2 in pairwise(range(5)):
-        link_step_nodes((i1, i1), (i2, i2))
-    for i1, i2, i3 in triplewise(range(5)):
-        link_jump_nodes((i1, i1), (i2, i2), (i3, i3))
-
-    # corner to corner diagonal line: /
-    for i1, i2 in pairwise(range(5)):
-        link_step_nodes((i1, 4 - i1), (i2, 4 - i2))
-    for i1, i2, i3 in triplewise(range(5)):
-        link_jump_nodes((i1, 4 - i1), (i2, 4 - i2), (i3, 4 - i3))
-
-    # bottom left: \
-    for i1, i2 in pairwise(range(3)):
-        link_step_nodes((i1 + 2, i1), (i2 + 2, i2))
-    for i1, i2, i3 in triplewise(range(3)):
-        link_jump_nodes((i1 + 2, i1), (i2 + 2, i2), (i3 + 2, i3))
-
-    # top right: \
-    for i1, i2 in pairwise(range(3)):
-        link_step_nodes((i1, i1 + 2), (i2, i2 + 2))
-    for i1, i2, i3 in triplewise(range(3)):
-        link_jump_nodes((i1, i1 + 2), (i2, i2 + 2), (i3, i3 + 2))
-
-    # top left: /
-    for i1, i2 in pairwise(range(3)):
-        link_step_nodes((i1, 2 - i1), (i2, 2 - i2))
-    for i1, i2, i3 in triplewise(range(3)):
-        link_jump_nodes((i1, 2 - i1), (i2, 2 - i2), (i3, 2 - i3))
-
-    # bottom right: /
-    for i1, i2 in pairwise(range(3)):
-        link_step_nodes((i1 + 2, 4 - i1), (i2 + 2, 4 - i2))
-    for i1, i2, i3 in triplewise(range(3)):
-        link_jump_nodes((i1 + 2, 4 - i1), (i2 + 2, 4 - i2), (i3 + 2, 4 - i3))
-
-    return graphs
+JUMPS_GRAPH = {
+    0: [2, 10, 12],
+    1: [3, 11],
+    2: [0, 4, 12, 14, 10],
+    3: [1, 13],
+    4: [2, 14, 12],
+    5: [7, 15],
+    6: [8, 16, 18],
+    7: [5, 9, 17],
+    8: [6, 18, 16],
+    9: [7, 19],
+    10: [12, 0, 20, 22, 2],
+    11: [13, 1, 21],
+    12: [10, 14, 2, 22, 0, 24, 20, 4],
+    13: [11, 3, 23],
+    14: [12, 4, 24, 2, 22],
+    15: [17, 5],
+    16: [18, 6, 8],
+    17: [15, 19, 7],
+    18: [16, 8, 6],
+    19: [17, 9],
+    20: [22, 10, 12],
+    21: [23, 11],
+    22: [20, 24, 12, 10, 14],
+    23: [21, 13],
+    24: [22, 14, 12],
+}

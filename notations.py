@@ -20,14 +20,17 @@ import re
 from funcy import joining, post_processing
 
 
+ALL_POS_NUMS = set(range(25))
+
+
 @post_processing(tuple)
-def notation_to_coords(s):
+def notation_to_coords(notation):
     """
     Placement: A1
     Step: A1-A2
     Jump: A1-A2-A3
     """
-    for notation in re.split(r'[- ]+', s):
+    for notation in re.split(r'[- ]+', notation):
         col, row = notation
         yield 'ABCDE'.index(col.upper()), int(row) - 1
 
@@ -46,7 +49,8 @@ def coord_to_pos_num(coord):
 
 
 def pos_num_to_coord(pos_num):
-    return divmod(pos_num, 5)
+    y, x = divmod(pos_num, 5)
+    return x, y
 
 
 @post_processing(tuple)

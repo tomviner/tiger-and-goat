@@ -6,6 +6,7 @@ networkx
 pygraphviz
 scipy
 
+pytest
 isort
 black
 flake8
