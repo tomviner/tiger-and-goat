@@ -25,7 +25,7 @@ def display(pieces, goats_to_place=0, goats_eaten=0):
         board[n] = piece
         # emoji take up 2 spaces in my terminal
         dels.append(n - 1)
-    # remove from end, so indexes still make sense
+    # remove from end of string, so indexes still make sense
     for n in sorted(dels, reverse=True):
         del board[n]
     print(GOAT_CHAR * goats_to_place)
