@@ -1,4 +1,4 @@
-"""Converters for our notation systems.
+r"""Converters for our notation systems.
 
 - coords: (0, 0) to (4, 4), with origin top left
 - pos_num: internal system, with positions (0-24 inc) enumerated below
@@ -14,6 +14,14 @@
 4 15─16─17─18─19
    │╱ │╲ │╱ │╲ │
 5 20─21─22─23─24
+
+Note about pos nums, jumps from src to dest consist of pos nums deltas:
+- eat +1 landing on +2 (horizontal)
+- eat +5 landing on +10 (vertical)
+- eat +6 landing on +12 (diag: \)
+- eat +4 landing on +8 (diag: /)
+- (and the reverse of each)
+in all cases the eaten is the average of of src & dest pos nums
 """
 import re
 

@@ -13,13 +13,14 @@ from constants import (
     NUM_GOATS,
     TIGER_CHAR,
     TIGER_PLAYER,
+    STARTING_TIGERS
 )
 from graph import JUMPS_GRAPH, STEPS_GRAPH
 from notations import ALL_POS_NUMS, notation_to_pos_num, pos_num_to_notation
+from pieces import Pieces
 
 
 def apply_move(coords, pieces):
-    pieces = pieces.copy()
     if len(coords) == 1:
         pos = coords[0]
         pieces[pos] = GOAT_CHAR
@@ -30,13 +31,9 @@ def apply_move(coords, pieces):
         src, eaten, dest = coords
         pieces[dest] = pieces.pop(src)
         del pieces[eaten]
-    else:
-        raise ValueError(coords)
-    return pieces
 
 
 def unapply_move(coords, pieces):
-    pieces = pieces.copy()
     if len(coords) == 1:
         pos = coords[0]
         del pieces[pos]
@@ -47,19 +44,6 @@ def unapply_move(coords, pieces):
         src, eaten, dest = coords
         pieces[src] = pieces.pop(dest)
         pieces[eaten] = GOAT_CHAR
-    else:
-        raise ValueError(coords)
-    return pieces
-
-
-def split_nodes(pieces):
-    tigers, goats = [], []
-    for pos_num, piece in sorted(pieces.items()):
-        if piece == TIGER_CHAR:
-            tigers.append(pos_num)
-        else:
-            goats.append(pos_num)
-    return tuple(tigers), tuple(goats)
 
 
 class TigerAndGoat(TwoPlayersGame):
@@ -67,16 +51,15 @@ class TigerAndGoat(TwoPlayersGame):
 
     def __init__(self, players):
         self.players = players
-        self.pieces = {}
+        self.pieces = self.initial_pieces()
         self.goats_to_place = NUM_GOATS
         # goat always starts
         self.nplayer = GOAT_PLAYER
-        self.place_tigers()
         # check for repetition against the most recent states.
         # just far back enough to prevent endless loops.
         # AI lookahead will append and then pop (upon unmove), so this must be sized as
         # "enough history" + AI lookahead depth
-        self.history = deque([split_nodes(self.pieces)], maxlen=self.history_max_len)
+        self.history = deque([self.pieces.grouped], maxlen=self.history_max_len)
 
     def ttentry(self):
         """Game state consists of:
@@ -85,8 +68,8 @@ class TigerAndGoat(TwoPlayersGame):
         - possibly truncated piece position history, always at least 1 turn back
             - while still placing goats just keep 1 turn, as move loops won't last
         """
-        history = [self.history[-1]] if self.goats_to_place else self.history
-        return (self.player.name, self.goats_to_place, tuple(history))
+        history = (self.history[-1],) if self.goats_to_place else tuple(self.history)
+        return (self.player.name, self.goats_to_place, history)
 
     def ttrestore(self, entry):
         player_name, self.goats_to_place, history = entry
@@ -94,16 +77,12 @@ class TigerAndGoat(TwoPlayersGame):
         self.nplayer = 1 if player_name == self.players[0].name else 2
         tigers, goats = history[-1]
 
-        self.pieces = {
-            **dict.fromkeys(tigers, TIGER_CHAR),
-            **dict.fromkeys(goats, GOAT_CHAR),
-        }
-
+        self.pieces = Pieces(tigers, goats)
         self.history = deque(history, maxlen=self.history_max_len)
 
-    def place_tigers(self):
-        # corner positions
-        self.pieces.update(dict.fromkeys([0, 4, 20, 24], TIGER_CHAR))
+    def initial_pieces(self):
+        # tigers in corner positions
+        return Pieces(tigers=STARTING_TIGERS)
 
     def pretty_move(self, pos_nums):
         return pos_num_to_notation(pos_nums)
@@ -115,13 +94,13 @@ class TigerAndGoat(TwoPlayersGame):
             raise
 
     def make_move(self, coords):
-        self.pieces = apply_move(coords, self.pieces)
+        apply_move(coords, self.pieces)
         if len(coords) == 1:
             self.goats_to_place -= 1
-        self.history.append(split_nodes(self.pieces))
+        self.history.append(self.pieces.grouped)
 
     def unmake_move(self, coords):
-        self.pieces = unapply_move(coords, self.pieces)
+        unapply_move(coords, self.pieces)
         if len(coords) == 1:
             self.goats_to_place += 1
         self.history.pop()
@@ -140,62 +119,53 @@ class TigerAndGoat(TwoPlayersGame):
         # For placing the first goat: use the upper half of the top-left quadrant
         return {0, 1, 2, 6, 7, 12}
 
-    def tiger_nodes(self):
-        return [pos for pos, piece in self.pieces.items() if piece == TIGER_CHAR]
-
-    def goat_nodes(self):
-        return [pos for pos, piece in self.pieces.items() if piece == GOAT_CHAR]
-
-    def seen(self, coords):
+    def is_repeat(self, coords):
         if self.goats_to_place:
             return False
-        new_pieces = apply_move(coords, self.pieces)
-        return split_nodes(new_pieces) in self.history
+        new_pieces = self.pieces.copy()
+        apply_move(coords, new_pieces)
+        return new_pieces.grouped in self.history
 
-    def get_steps(self, nodes):
+    def get_steps(self, nodes, short_circuit=False):
         for node in nodes:
             for dest in STEPS_GRAPH[node]:
                 if dest not in self.pieces:
                     coords = node, dest
-                    if not self.seen(coords):
+                    if not self.is_repeat(coords):
                         yield coords
+                        if short_circuit:
+                            break
 
-    def tiger_steps(self):
-        yield from self.get_steps(self.tiger_nodes())
+    def tiger_steps(self, short_circuit):
+        yield from self.get_steps(self.pieces.inv[TIGER_CHAR], short_circuit)
 
-    def tiger_jumps(self):
-        for tiger in self.tiger_nodes():
+    def tiger_jumps(self, short_circuit):
+        for tiger in self.pieces.tigers:
             for dest in JUMPS_GRAPH[tiger]:
-                # jumps from src to dest consist of pos nums deltas:
-                # - eat +1 landing on +2 (horizontal)
-                # - eat +5 landing on +10 (vertical)
-                # - eat +6 landing on +12 (diag: \)
-                # - eat +4 landing on +8 (diag: /)
-                # - (and the reverse of each)
-                # in all cases the eaten is the average of of src & dest pos nums
                 eaten = (tiger + dest) // 2
                 if self.pieces.get(eaten) == GOAT_CHAR and dest not in self.pieces:
                     coords = tiger, eaten, dest
                     yield coords
+                    if short_circuit:
+                        break
 
     def mobile_tigers(self):
-        # pass short_circuit = True
-        return len({mv[0] for mv in self.tiger_moves()})
+        return len({mv[0] for mv in self.tiger_moves(short_circuit=True)})
 
     def goat_placements(self):
         # first goat placed only need consider unique positions
-        if len(self.pieces) == 4:
-            positions = self.unique_positions() - set(self.pieces)
+        if self.pieces == STARTING_TIGERS:
+            positions = self.unique_positions() - self.pieces.inv[TIGER_CHAR]
         else:
             positions = self.empty()
         return [(pos,) for pos in positions]
 
     def goat_steps(self):
-        yield from self.get_steps(self.goat_nodes())
+        yield from self.get_steps(self.pieces.inv[GOAT_CHAR])
 
-    def tiger_moves(self):
-        yield from self.tiger_jumps()
-        yield from self.tiger_steps()
+    def tiger_moves(self, short_circuit=False):
+        yield from self.tiger_jumps(short_circuit)
+        yield from self.tiger_steps(short_circuit)
 
     def goat_moves(self):
         if self.goats_to_place:
@@ -217,7 +187,7 @@ class TigerAndGoat(TwoPlayersGame):
         return self.goats_eaten() >= NUM_EATEN_LOSE
 
     def goat_wins(self):
-        return self.tigers_go() and not list(self.tiger_moves())
+        return self.tigers_go() and not self.mobile_tigers()
 
     def is_draw(self):
         """If tiger can't move it loses. If goat can't move, we call it a draw,
@@ -237,7 +207,6 @@ class TigerAndGoat(TwoPlayersGame):
             print('goat cannot move, A DRAW!')
         score = abs(self.scoring())
         print('score:', score, 'x' * score)
-        print(self.ttentry())
 
     def scoring(self):
         mobile_tigers = self.mobile_tigers()
@@ -266,8 +235,8 @@ if __name__ == "__main__":
     if 1:
         kw1 = {'tt': TT()}
         kw2 = {'tt': TT()}
-    goat_ai = Negamax(6, **kw1)
-    tiger_ai = Negamax(6, **kw2)
+    goat_ai = Negamax(5, **kw1)
+    tiger_ai = Negamax(5, **kw2)
     game = TigerAndGoat([AI_Player(goat_ai, 'goat'), AI_Player(tiger_ai, 'tiger')])
 
     start = time.monotonic()

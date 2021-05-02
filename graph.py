@@ -1,6 +1,7 @@
 "Compiled board move graphs using pos nums. See tests for how these were formed."
 
 
+# Maps a board pos_num to the pos_nums that can be directly stepped to
 STEPS_GRAPH = {
     0: [1, 5, 6],
     1: [0, 2, 6],
@@ -30,6 +31,7 @@ STEPS_GRAPH = {
 }
 
 
+# Maps a board pos_num to the pos_nums that a tiger can jump to
 JUMPS_GRAPH = {
     0: [2, 10, 12],
     1: [3, 11],
