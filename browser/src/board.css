@@ -9,13 +9,11 @@
 }
 
 .box {
-    border: 2px solid black;
     position: relative;
 }
 
-.hiddenBox {
-    position: relative;
-
+.visibleBox {
+    border: 2px solid black;
 }
 
 .diagBackward {
@@ -39,7 +37,7 @@
 }
 
 .piece {
-    right: 70px;
+    right: 65px;
     bottom: 70px;
     position: absolute;
 }
