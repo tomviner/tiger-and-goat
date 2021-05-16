@@ -1,0 +1,45 @@
+.gameBoard{
+    display: grid;
+    grid-template-columns: repeat(5, 100px);
+    grid-template-rows: repeat(5, 100px);
+
+    justify-content: center;
+    padding-top: 100px;
+
+}
+
+.box {
+    border: 2px solid black;
+    position: relative;
+}
+
+.hiddenBox {
+    position: relative;
+
+}
+
+.diagBackward {
+    background: linear-gradient(to top right, #fff calc(50% - 2px), #000, #fff calc(50% + 2px) )
+}
+
+.diagForward {
+    background: linear-gradient(to top left, #fff calc(50% - 2px), #000, #fff calc(50% + 2px) )
+}
+
+.tiger:after {
+    content: "🐅";
+}
+
+.goat:after {
+    content: "🐐";
+}
+
+.tiger:after, .goat:after {
+    font-size: 50px;
+}
+
+.piece {
+    right: 70px;
+    bottom: 70px;
+    position: absolute;
+}
