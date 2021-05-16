@@ -2,6 +2,10 @@ from decopatch import F_ARGS, F_KWARGS, WRAPPED, function_decorator
 
 
 GLOBAL_CACHE = {}
+CACHE_DATA = {
+    'hits': 0,
+    'miss': 0,
+}
 
 
 @function_decorator
@@ -26,13 +30,19 @@ def cache(
     try:
         value = _cache[key]
         # print('HIT', end=' ')
+        # CACHE_DATA['hits'] += 1
     except KeyError:
         value = func(*func_args, **func_kwargs)
         _cache[key] = value
         # print('MISS', end=' ')
+        # CACHE_DATA['miss'] += 1
 
     # print(key)
     # print(value)
+    # import random
+    # if not random.randint(0, 5000):
+    #     hit_rate = CACHE_DATA['hits'] / (CACHE_DATA['hits'] + CACHE_DATA['miss'])
+    #     print(f"{CACHE_DATA['hits']} Hits ({hit_rate:.0%}), {CACHE_DATA['miss']} Misses, {len(GLOBAL_CACHE)} Mem")
     return value
 
 

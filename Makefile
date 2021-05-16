@@ -1,11 +1,11 @@
 tidy-imports:
-	@autoflake --in-place --remove-all-unused-imports --ignore-init-module-imports --recursive .
+	@autoflake --in-place --remove-all-unused-imports --ignore-init-module-imports --recursive server
 
 black:
-	@black .
+	@black server
 
 isort:
-	@isort .
+	@isort server
 
 format: black isort
 	

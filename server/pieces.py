@@ -7,10 +7,10 @@ class Pieces(MutableMapping):
     def __init__(self, tigers=(), goats=()):
         self.tigers = set(tigers)
         self.goats = set(goats)
-        self.inv = {TIGER_CHAR: self.tigers, GOAT_CHAR: self.goats}
+        self.inverse = {TIGER_CHAR: self.tigers, GOAT_CHAR: self.goats}
 
     @property
-    def grouped(self):
+    def canonical(self):
         return frozenset(self.tigers), frozenset(self.goats)
 
     def copy(self):
@@ -27,11 +27,13 @@ class Pieces(MutableMapping):
         raise KeyError
 
     def __setitem__(self, key, value):
-        self.inv[value].add(key)
+        self.inverse[value].add(key)
 
     def __delitem__(self, item):
-        self.tigers.discard(item)
-        self.goats.discard(item)
+        try:
+            self.tigers.remove(item)
+        except KeyError:
+            self.goats.remove(item)
 
     def __iter__(self):
         yield from self.tigers

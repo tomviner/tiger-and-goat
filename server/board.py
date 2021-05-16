@@ -31,3 +31,15 @@ def display(pieces, goats_to_place=0, goats_eaten=0):
     print(GOAT_CHAR * goats_to_place)
     print(''.join(board))
     print(GOAT_CHAR * goats_eaten)
+
+
+if __name__ == '__main__':
+    import json
+    import sys
+
+    from pieces import Pieces
+
+    data = json.load(sys.stdin)
+    player_name, goats_to_place, history = data
+    pieces = Pieces(*history[-1])
+    display(pieces, goats_to_place, 20 - goats_to_place - len(pieces.goats))

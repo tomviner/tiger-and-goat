@@ -5,6 +5,7 @@ matplotlib
 networkx
 pygraphviz
 scipy
+hug
 
 pytest
 isort
