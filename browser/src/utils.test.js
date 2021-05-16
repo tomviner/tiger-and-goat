@@ -29,10 +29,17 @@ describe('rand', () => {
     expect(rand(1)).toEqual(true);
   });
 
-  describe('non-int chances', () => {
+  describe('non-int chances that come true', () => {
     mockRandomForEach([0.1, 0.5, 0.9]);
     test('compares accurately', () => {
       expect(rand(0.9)).toEqual(true);
+    });
+  });
+
+  describe('non-int chances that come false', () => {
+    mockRandomForEach([0.1, 0.5, 0.9]);
+    test('compares accurately', () => {
+      expect(rand(0.09)).toEqual(false);
     });
   });
 
