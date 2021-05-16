@@ -1,4 +1,4 @@
-import { mockRandom, resetMockRandom } from 'jest-mock-random';
+import { mockRandomForEach } from 'jest-mock-random';
 import { List } from 'immutable';
 
 import { range2d, rand, sum, getClsNames } from './utils';
@@ -13,7 +13,7 @@ describe('2d range', () => {
         List([1, 0]),
         List([1, 1]),
         List([1, 2]),
-      ])
+      ]),
     );
   });
 });
@@ -29,6 +29,13 @@ describe('rand', () => {
     expect(rand(1)).toEqual(true);
   });
 
+  describe('non-int chances', () => {
+    mockRandomForEach([0.1, 0.5, 0.9]);
+    test('compares accurately', () => {
+      expect(rand(0.9)).toEqual(true);
+    });
+  });
+
   test('returns hopeless chance as false', () => {
     expect(rand(0)).toEqual(false);
   });
@@ -42,8 +49,6 @@ describe('getClsNames', () => {
   });
 
   test('returns static names too', () => {
-    expect(getClsNames({ dyn: true }, 'static other')).toEqual(
-      'static other dyn'
-    );
+    expect(getClsNames({ dyn: true }, 'static other')).toEqual('static other dyn');
   });
 });

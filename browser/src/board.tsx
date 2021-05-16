@@ -1,21 +1,28 @@
 import React from 'react';
-import { range2d, getClsNames, rand } from './utils.js';
+import { range2d, getClsNames, rand } from './utils';
 
 import './board.css';
 
-function Board() {
-
+function Board(): JSX.Element {
   return (
-    <div className={"gameBoard"}>
-      {
-        range2d(5, 5).toJS().map(([x, y]) => {
-          const visible = x < 4 && y < 4;
+    <div className={'gameBoard'}>
+      {range2d(5, 5)
+        .toJS()
+        .map(([x, y]) => {
+          const pos_num = 5 * y + x;
 
-          const boxClsNames = getClsNames({
-            visibleBox: visible,
-            diagForward: (visible && ((x + y) % 2)),
-            diagBackward: (visible && !((x + y) % 2)),
-          }, "box");
+          const visible = x < 4 && y < 4;
+          const diagBackward = (x + y) % 2 === 0;
+
+          const boxClsNames = getClsNames(
+            {
+              visibleBox: visible,
+              hiddenBox: !visible,
+              diagForward: visible && !diagBackward,
+              diagBackward: visible && diagBackward,
+            },
+            'box',
+          );
 
           let pieceClass = '';
           if (rand(0.3)) {
@@ -27,12 +34,11 @@ function Board() {
           }
           const pieceClsNames = getClsNames({}, `${pieceClass} piece`);
           return (
-            <div className={boxClsNames}>
+            <div className={boxClsNames} key={pos_num}>
               <div className={pieceClsNames}></div>
             </div>
-          )
-        })
-      }
+          );
+        })}
     </div>
   );
 }

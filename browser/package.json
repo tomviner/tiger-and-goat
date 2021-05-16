@@ -10,7 +10,13 @@
     "@types/node": "^12.20.13",
     "@types/react": "^17.0.5",
     "@types/react-dom": "^17.0.5",
+    "@typescript-eslint/eslint-plugin": "^4.23.0",
+    "@typescript-eslint/parser": "^4.23.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-react": "^7.23.2",
     "immutable": "^4.0.0-rc.12",
+    "jest-mock-random": "^1.1.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
@@ -23,9 +29,9 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "format": "npm run prettify -- --write",
-    "lint": "eslint ./src --ignore-path .gitignore",
-    "lint:css": "stylelint \"src/**/*.[jt]s\" --syntax scss",
-    "prettify": "prettier \"src/**/*.[jt]s\""
+    "lint": "eslint ./src --ignore-path .gitignore --fix",
+    "lint:css": "stylelint \"src/**/*.css\"",
+    "prettify": "prettier \"src/**/*.{js,ts,tsx}\""
   },
   "eslintConfig": {
     "extends": [
@@ -47,6 +53,7 @@
   },
   "devDependencies": {
     "eslint": "^7.26.0",
-    "prettier": "^2.3.0"
+    "prettier": "^2.3.0",
+    "stylelint": "^13.13.1"
   }
 }
