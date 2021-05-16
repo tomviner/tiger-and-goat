@@ -23,8 +23,8 @@
     "eject": "react-scripts eject",
     "format": "npm run prettify -- --write",
     "lint": "eslint ./src --ignore-path .gitignore",
-    "lint:css": "stylelint \"src/**/*.js\" --syntax scss",
-    "prettify": "prettier \"src/**/*.js\""
+    "lint:css": "stylelint \"src/**/*.[jt]s\" --syntax scss",
+    "prettify": "prettier \"src/**/*.[jt]s\""
   },
   "eslintConfig": {
     "extends": [
