@@ -74,6 +74,18 @@ class TigerAndGoat(TwoPlayersGame):
             history = tuple(list(map(list, pieces)) for pieces in history)
         return (self.nplayer, self.goats_to_place, history)
 
+    def as_dict(self):
+        nplayer, goats_to_place, history = self.ttentry()
+        tigers, goats = history[-1]
+
+        return {
+            'playerNum': nplayer,
+            'goatsToPlace': goats_to_place,
+            'history': history,
+            'tigers': sorted(tigers),
+            'goats': sorted(goats),
+        };
+
     def ttrestore(self, entry):
         self.nplayer, self.goats_to_place, history = entry
 

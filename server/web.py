@@ -37,7 +37,10 @@ def get_game(request, session):
 
 session_store = InMemoryStore()
 middleware = SessionMiddleware(session_store, cookie_secure=False)
-hug.API(__name__).http.add_middleware(middleware)
+
+api = hug.API(__name__)
+api.http.add_middleware(middleware)
+api.http.add_middleware(hug.middleware.CORSMiddleware(api))
 
 
 @hug.get()
@@ -45,8 +48,7 @@ hug.API(__name__).http.add_middleware(middleware)
 def hello(session: hug.directives.session, request):
     game = get_game(request, session)
 
-    return game.ttentry()
-    return json.loads(json.dumps(vars(game), default=str))
+    return game.as_dict()
 
 
 @hug.post()
