@@ -62,10 +62,10 @@ def hello(move: list[int], session: hug.directives.session, request, response):
         game.play_move(ai_move)
 
     data = game.ttentry(json_safe=True)
-    print(f'{data=} {json.dumps(data)=}')
+    # print(f'{data=} {json.dumps(data)=}')
     session['game'] = data
     cookie = (json.dumps(data).encode()).decode()
-    print(f'{cookie=}')
+    # print(f'{cookie=}')
     response.set_cookie('game', cookie, secure=False)
     return data
 

@@ -1,0 +1,22 @@
+.tiger:after {
+    content: "🐅";
+}
+
+.goat:after {
+    content: "🐐";
+}
+
+.tiger:after, .goat:after {
+    font-size: 50px;
+}
+
+.piece {
+    right: 65px;
+    bottom: 75px;
+    position: absolute;
+}
+
+.piece.isDragging {
+    opacity: 0.5;
+    cursor: move;
+}

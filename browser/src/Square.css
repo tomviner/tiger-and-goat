@@ -1,0 +1,19 @@
+.square {
+    position: relative;
+}
+
+.square.isOver {
+    background: yellow;
+}
+
+.visibleSquare {
+    border: 2px solid black;
+}
+
+.diagBackward {
+    background: linear-gradient(to top right, #fff calc(50% - 2px), #000, #fff calc(50% + 2px) )
+}
+
+.diagForward {
+    background: linear-gradient(to top left, #fff calc(50% - 2px), #000, #fff calc(50% + 2px) )
+}

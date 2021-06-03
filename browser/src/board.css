@@ -7,37 +7,3 @@
     padding-top: 50px;
 
 }
-
-.box {
-    position: relative;
-}
-
-.visibleBox {
-    border: 2px solid black;
-}
-
-.diagBackward {
-    background: linear-gradient(to top right, #fff calc(50% - 2px), #000, #fff calc(50% + 2px) )
-}
-
-.diagForward {
-    background: linear-gradient(to top left, #fff calc(50% - 2px), #000, #fff calc(50% + 2px) )
-}
-
-.tiger:after {
-    content: "🐅";
-}
-
-.goat:after {
-    content: "🐐";
-}
-
-.tiger:after, .goat:after {
-    font-size: 50px;
-}
-
-.piece {
-    right: 65px;
-    bottom: 75px;
-    position: absolute;
-}
