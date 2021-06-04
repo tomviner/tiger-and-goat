@@ -6,6 +6,7 @@ import { useDrag } from 'react-dnd';
 function GoatToPlace(): JSX.Element {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.GOAT,
+    item: { toPlace: true },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),

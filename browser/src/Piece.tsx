@@ -12,7 +12,7 @@ export interface PieceProps {
 function Piece({ type, pos_num }: PieceProps): JSX.Element {
   const [{ isDragging }, drag] = useDrag(() => ({
     type,
-    item: { pos_num },
+    item: { pos_num, toPlace: false },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
