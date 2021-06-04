@@ -18,7 +18,6 @@ const checkResponse = (res: ApiResponse<any>) => {
   const { ok, data } = res;
 
   if (ok) {
-    console.log(data);
     return <GameType>data;
   }
   throw Error;

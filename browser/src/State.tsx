@@ -1,4 +1,5 @@
-import { atom } from 'recoil';
+import { atom, selector } from 'recoil';
+import { NUM_GOATS } from './Constants';
 
 export const tigersState = atom({
   key: 'tigersState',
@@ -12,5 +13,15 @@ export const goatsState = atom({
 
 export const numGoatsToPlaceState = atom({
   key: 'numGoatsToPlaceState',
-  default: 20,
+  default: NUM_GOATS,
+});
+
+export const numGoatsEatenState = selector({
+  key: 'numGoatsEatenState',
+  get: ({ get }) => {
+    const goats = get(goatsState);
+    const numGoatsToPlace = get(numGoatsToPlaceState);
+
+    return NUM_GOATS - numGoatsToPlace - goats.length;
+  },
 });

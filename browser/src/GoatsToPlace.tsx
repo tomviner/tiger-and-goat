@@ -1,15 +1,14 @@
 import React from 'react';
 import { Range } from 'immutable';
 import GoatToPlace from './GoatToPlace';
+import { numGoatsToPlaceState } from './State';
+import { useRecoilValue } from 'recoil';
 
-export interface GoatsToPlaceProps {
-  numGoatsToPlace: number;
-}
-
-function GoatsToPlace({ numGoatsToPlace }: GoatsToPlaceProps): JSX.Element {
+function GoatsToPlace(): JSX.Element {
+  const numGoatsToPlace = useRecoilValue(numGoatsToPlaceState);
   return (
-    <div className={(numGoatsToPlace || 0).toString()}>
-      {Range(0, numGoatsToPlace || 0).map((_, i) => (
+    <div className={numGoatsToPlace.toString()}>
+      {Range(0, numGoatsToPlace).map((i) => (
         <GoatToPlace key={i} />
       ))}
     </div>

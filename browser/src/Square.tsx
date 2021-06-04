@@ -18,15 +18,15 @@ export interface SquareProps {
 function Square({ x, y }: SquareProps): JSX.Element {
   const [tigers, setTigers] = useRecoilState(tigersState);
   const [goats, setGoats] = useRecoilState(goatsState);
-  const setNumGoatsToPlace = useSetRecoilState(numGoatsToPlaceState);
+  const [numGoatsToPlace, setNumGoatsToPlace] = useRecoilState(numGoatsToPlaceState);
 
   const pos_num: number = 5 * y + x;
 
   const visible = x < 4 && y < 4;
   const diagBackward = (x + y) % 2 === 0;
 
-  const canMove: (pos_num: number) => boolean = (pos_num) => {
-    return !tigers.includes(pos_num) && !goats.includes(pos_num);
+  const canMove = (pos_num: number) => {
+    return ![...tigers, ...goats].includes(pos_num);
   };
 
   const doMove: (
@@ -55,7 +55,7 @@ function Square({ x, y }: SquareProps): JSX.Element {
         item: monitor.getItem(),
       }),
     }),
-    [x, y],
+    [x, y, tigers, goats],
   );
 
   const squareClsNames = getClsNames(

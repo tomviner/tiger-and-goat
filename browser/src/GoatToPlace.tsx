@@ -2,6 +2,7 @@ import React from 'react';
 
 import { ItemTypes } from './Constants';
 import { useDrag } from 'react-dnd';
+import './GoatToPlace.css';
 
 function GoatToPlace(): JSX.Element {
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -12,7 +13,11 @@ function GoatToPlace(): JSX.Element {
     }),
   }));
 
-  return <span ref={drag}>🐐</span>;
+  return (
+    <span className={'goatToPlace'} ref={drag}>
+      🐐
+    </span>
+  );
 }
 
 export default GoatToPlace;

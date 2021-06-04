@@ -37,7 +37,8 @@
     "format": "npm run prettify -- --write",
     "lint": "eslint ./src --ignore-path .gitignore --fix",
     "lint:css": "stylelint \"src/**/*.css\"",
-    "prettify": "prettier \"src/**/*.{js,ts,tsx}\""
+    "prettify": "prettier \"src/**/*.{js,ts,tsx}\"",
+    "prettier-watch": "onchange 'src/**/*.{js,ts,tsx}' -- prettier --write {{changed}}"
   },
   "eslintConfig": {
     "extends": [
@@ -59,6 +60,7 @@
   },
   "devDependencies": {
     "eslint": "^7.26.0",
+    "onchange": "^7.1.0",
     "prettier": "^2.3.0",
     "stylelint": "^13.13.1"
   }
