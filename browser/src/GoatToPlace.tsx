@@ -1,7 +1,6 @@
 import React from 'react';
-
-import { ItemTypes } from './Constants';
 import { useDrag } from 'react-dnd';
+import { ItemTypes } from './Constants';
 import './GoatToPlace.css';
 
 function GoatToPlace(): JSX.Element {

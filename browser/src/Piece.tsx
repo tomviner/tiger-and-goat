@@ -1,8 +1,7 @@
 import React from 'react';
-import { ItemTypes } from './Constants';
 import { useDrag } from 'react-dnd';
-import { getClsNames } from './utils';
 import './Piece.css';
+import { getClsNames } from './utils';
 
 export interface PieceProps {
   type: string;

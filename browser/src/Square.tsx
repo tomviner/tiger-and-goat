@@ -1,13 +1,11 @@
+import _ from 'lodash';
 import React from 'react';
 import { useDrop } from 'react-dnd';
-import { useRecoilState, useSetRecoilState } from 'recoil';
-import _ from 'lodash';
-import Piece from './Piece';
-
+import { useRecoilState } from 'recoil';
 import { ItemTypes } from './Constants';
-import { tigersState, goatsState, numGoatsToPlaceState } from './State';
+import Piece from './Piece';
 import './Square.css';
-
+import { goatsState, numGoatsToPlaceState, tigersState } from './State';
 import { getClsNames } from './utils';
 
 export interface SquareProps {

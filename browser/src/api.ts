@@ -1,4 +1,4 @@
-import { create, ApiResponse } from 'apisauce';
+import { ApiResponse, create } from 'apisauce';
 
 const api = create({
   baseURL: 'http://localhost:8000',

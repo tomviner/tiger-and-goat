@@ -1,7 +1,6 @@
-import { mockRandomForEach } from 'jest-mock-random';
 import { List } from 'immutable';
-
-import { range2d, rand, sum, getClsNames } from './utils';
+import { mockRandomForEach } from 'jest-mock-random';
+import { getClsNames, rand, range2d, sum } from './utils';
 
 describe('2d range', () => {
   test('returns all coord pairs', () => {

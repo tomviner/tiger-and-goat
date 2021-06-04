@@ -1,8 +1,8 @@
-import React from 'react';
 import { Range } from 'immutable';
+import React from 'react';
+import { useRecoilValue } from 'recoil';
 import GoatToPlace from './GoatToPlace';
 import { numGoatsToPlaceState } from './State';
-import { useRecoilValue } from 'recoil';
 
 function GoatsToPlace(): JSX.Element {
   const numGoatsToPlace = useRecoilValue(numGoatsToPlaceState);

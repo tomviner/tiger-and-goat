@@ -1,6 +1,5 @@
 import React from 'react';
-import { RecoilRoot, atom, selector, useRecoilState, useRecoilValue } from 'recoil';
-
+import { RecoilRoot } from 'recoil';
 import './App.css';
 import Board from './board';
 

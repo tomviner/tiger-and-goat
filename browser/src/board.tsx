@@ -1,19 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import React, { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-
-import Square from './Square';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { GameType, getData } from './api';
+import './board.css';
 import GoatsToPlace from './GoatsToPlace';
+import Square from './Square';
 import {
-  tigersState,
   goatsState,
-  numGoatsToPlaceState,
   numGoatsEatenState,
+  numGoatsToPlaceState,
+  tigersState,
 } from './State';
 import { range2d } from './utils';
-import './board.css';
-import { getData, GameType } from './api';
 
 function Board(): JSX.Element {
   const [playerNum, setPlayerNum] = useState(0);
