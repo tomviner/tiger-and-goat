@@ -2,6 +2,7 @@ import React from 'react';
 import { useDrag } from 'react-dnd';
 import { ItemTypes } from './Constants';
 import './GoatToPlace.css';
+import { getClsNames } from './utils';
 
 function GoatToPlace(): JSX.Element {
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -12,8 +13,10 @@ function GoatToPlace(): JSX.Element {
     }),
   }));
 
+  const clsNames = getClsNames({ isDragging }, 'goatToPlace');
+
   return (
-    <span className={'goatToPlace'} ref={drag}>
+    <span className={clsNames} ref={drag}>
       🐐
     </span>
   );

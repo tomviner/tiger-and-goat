@@ -1,11 +1,16 @@
 import _ from 'lodash';
 import React from 'react';
 import { useDrop } from 'react-dnd';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { ItemTypes } from './Constants';
 import Piece from './Piece';
 import './Square.css';
-import { goatsState, numGoatsToPlaceState, tigersState } from './State';
+import {
+  goatsState,
+  numGoatsToPlaceState,
+  possibleMovesState,
+  tigersState,
+} from './State';
 import { getClsNames } from './utils';
 
 export interface SquareProps {
@@ -13,10 +18,16 @@ export interface SquareProps {
   y: number;
 }
 
+export interface ItemType {
+  toPlace: boolean;
+  pos_num: number;
+}
+
 function Square({ x, y }: SquareProps): JSX.Element {
   const [tigers, setTigers] = useRecoilState(tigersState);
   const [goats, setGoats] = useRecoilState(goatsState);
-  const [numGoatsToPlace, setNumGoatsToPlace] = useRecoilState(numGoatsToPlaceState);
+  const setNumGoatsToPlace = useSetRecoilState(numGoatsToPlaceState);
+  const possibleMoves = useRecoilValue(possibleMovesState);
 
   const pos_num: number = 5 * y + x;
 
@@ -24,12 +35,13 @@ function Square({ x, y }: SquareProps): JSX.Element {
   const diagBackward = (x + y) % 2 === 0;
 
   const canMove = (pos_num: number) => {
+    possibleMoves;
     return ![...tigers, ...goats].includes(pos_num);
   };
 
   const doMove: (
     itemType: string | symbol | null,
-    item: any,
+    item: ItemType,
     to_pos_num: number,
   ) => void = (itemType, item, to_pos_num) => {
     if (item.toPlace) {
@@ -37,20 +49,20 @@ function Square({ x, y }: SquareProps): JSX.Element {
     }
     const setter = itemType === ItemTypes.TIGER ? setTigers : setGoats;
     setter((oldPieces) => {
-      return [..._.filter(oldPieces, (val) => val !== item.pos_num), pos_num];
+      return [..._.filter(oldPieces, (val) => val !== item.pos_num), to_pos_num];
     });
   };
 
-  const [{ isOver, canDrop, item, itemType }, drop] = useDrop(
+  const [{ isOver, canDrop }, drop] = useDrop(
     () => ({
       accept: [ItemTypes.TIGER, ItemTypes.GOAT],
       canDrop: () => canMove(pos_num),
-      drop: (item, monitor) => doMove(monitor.getItemType(), item, pos_num),
+      drop: (item, monitor) => doMove(monitor.getItemType(), item as ItemType, pos_num),
       collect: (monitor) => ({
         isOver: !!monitor.isOver(),
         canDrop: !!monitor.canDrop(),
-        itemType: monitor.getItemType(),
-        item: monitor.getItem(),
+        // itemType: monitor.getItemType(),
+        // item: monitor.getItem(),
       }),
     }),
     [x, y, tigers, goats],

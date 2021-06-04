@@ -80,11 +80,12 @@ class TigerAndGoat(TwoPlayersGame):
 
         return {
             'playerNum': nplayer,
-            'goatsToPlace': goats_to_place,
+            'numGoatsToPlace': goats_to_place,
+            'possibleMoves': self.possible_moves(),
             'history': history,
             'tigers': sorted(tigers),
             'goats': sorted(goats),
-        };
+        }
 
     def ttrestore(self, entry):
         self.nplayer, self.goats_to_place, history = entry

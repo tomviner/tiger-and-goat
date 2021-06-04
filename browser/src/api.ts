@@ -6,23 +6,22 @@ const api = create({
 
 export type GameType = {
   playerNum: number;
-  goatsToPlace: number;
+  numGoatsToPlace: number;
   history: number[][];
+  possibleMoves: number[][];
   tigers: number[];
   goats: number[];
 };
 
-// https://github.com/infinitered/apisauce/issues/197
-// : (res: ApiResponse<GameType>) => GameType
-const checkResponse = (res: ApiResponse<any>) => {
-  const { ok, data } = res;
+const checkResponse = (value: ApiResponse<GameType>) => {
+  const { ok, data, problem, status } = value;
 
   if (ok) {
     return <GameType>data;
   }
-  throw Error;
+  throw Error(`${status} ${problem}`);
 };
 
-export const getData: () => Promise<any> = () => {
-  return api.get('/hello').then(checkResponse).catch(console.error);
+export const getData: () => Promise<GameType> = () => {
+  return api.get<GameType>('/hello').then(checkResponse);
 };

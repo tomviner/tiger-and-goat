@@ -16,6 +16,11 @@ export const numGoatsToPlaceState = atom({
   default: NUM_GOATS,
 });
 
+export const possibleMovesState = atom({
+  key: 'possibleMovesState',
+  default: [] as number[][],
+});
+
 export const numGoatsEatenState = selector({
   key: 'numGoatsEatenState',
   get: ({ get }) => {
