@@ -9,7 +9,7 @@ from hug.store import InMemoryStore
 from game import TigerAndGoat
 
 
-def get_game(request, session):
+def get_game(request, session, state=None):
     kw1, kw2 = {}, {}
     if 0:
         kw1 = {'tt': TT()}
@@ -18,13 +18,21 @@ def get_game(request, session):
     tiger_ai = Negamax(6, **kw2)
     game = TigerAndGoat([Human_Player('goat'), AI_Player(tiger_ai, 'tiger')])
 
+    hdr_game = request.headers.get('game')
     req_game = request.cookies.get('game')
     sess_game = session.get('game')
 
-    print(f'{request.cookies=} {req_game=} {sess_game=}')
+    print(f'{request.cookies=} {state=} {hdr_game=} {req_game=} {sess_game=}')
 
     data = None
-    if req_game:
+
+    if state:
+        data = state
+
+    elif hdr_game:
+        data = json.loads((hdr_game.encode()))
+
+    elif req_game:
         data = json.loads((req_game.encode()))
     # elif sess_game:
     #     data = sess_game
@@ -45,16 +53,21 @@ api.http.add_middleware(hug.middleware.CORSMiddleware(api))
 
 @hug.get()
 @hug.cli()
-def hello(session: hug.directives.session, request):
+def hello(session: hug.directives.session, request, response):
     game = get_game(request, session)
+
+    data = game.ttentry(json_safe=True)
+    cookie = (json.dumps(data).encode()).decode()
+
+    response.set_header('game', cookie)
 
     return game.as_dict()
 
 
 @hug.post()
 @hug.cli()
-def hello(move: list[int], session: hug.directives.session, request, response):
-    game = get_game(request, session)
+def hello(move: list[int], state, session: hug.directives.session, request, response):
+    game = get_game(request, session, state)
 
     game.play_move(move)
     if not game.is_over():
@@ -67,7 +80,8 @@ def hello(move: list[int], session: hug.directives.session, request, response):
     cookie = (json.dumps(data).encode()).decode()
     # print(f'{cookie=}')
     response.set_cookie('game', cookie, secure=False)
-    return data
+    response.set_header('game', cookie)
+    return game.as_dict()
 
 
 @hug.delete()

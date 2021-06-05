@@ -6,9 +6,9 @@ export const range2d: (a: number, b: number) => List<List<number>> = (a, b) =>
   // flat map concats the inner arrays, so we get each row's coords
   // directly after the last, in the same outer Array
   Range(0, a)
-    .flatMap((_, x) =>
+    .flatMap((_, y) =>
       // this is an array of coords
-      Range(0, b).map((_, y) => List([x, y])),
+      Range(0, b).map((_, x) => List([x, y])),
     )
     .toList();
 

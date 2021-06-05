@@ -1,17 +1,15 @@
 import React, { useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { GameType, getData } from './api';
 import './board.css';
 import GoatsToPlace from './GoatsToPlace';
 import Square from './Square';
 import {
   goatsState,
-  numGoatsEatenState,
   numGoatsToPlaceState,
   playerNumState,
-  playersTurnState,
   possibleMovesState,
   tigersState,
 } from './State';
@@ -23,14 +21,19 @@ function Board(): JSX.Element {
   const setGoats = useSetRecoilState(goatsState);
   const setNumGoatsToPlace = useSetRecoilState(numGoatsToPlaceState);
   const setPossibleMoves = useSetRecoilState(possibleMovesState);
-  const numGoatsEaten = useRecoilValue(numGoatsEatenState);
-  const playersTurn = useRecoilValue(playersTurnState);
 
   useEffect(() => {
     const res = getData();
     res
       .then((data: GameType) => {
         const { playerNum, numGoatsToPlace, tigers, goats, possibleMoves } = data;
+        console.log('GET', {
+          playerNum,
+          numGoatsToPlace,
+          tigers: JSON.stringify(tigers.toJS()),
+          goats: JSON.stringify(goats.toJS()),
+          possibleMoves: JSON.stringify(possibleMoves.toJS()),
+        });
         setPlayerNum(playerNum);
         setNumGoatsToPlace(numGoatsToPlace);
         setTigers(tigers);
@@ -43,11 +46,7 @@ function Board(): JSX.Element {
   return (
     <>
       <DndProvider backend={HTML5Backend}>
-        <div>Turn: {playersTurn.name}</div>
-        <div>
-          To place: <GoatsToPlace />
-        </div>
-        <div>Eaten: {'🐐'.repeat(numGoatsEaten)}</div>
+        <GoatsToPlace />
         <div className={'gameBoard'}>
           {range2d(5, 5)
             .toJS()

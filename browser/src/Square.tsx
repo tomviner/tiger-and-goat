@@ -2,6 +2,7 @@ import { List } from 'immutable';
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { GameType, postData } from './api';
 import { ItemTypes } from './Constants';
 import { JUMPS_GRAPH, STEPS_GRAPH } from './graph';
 import Piece from './Piece';
@@ -50,7 +51,7 @@ function Square({ x, y }: SquareProps): JSX.Element {
   const [tigers, setTigers] = useRecoilState(tigersState);
   const [goats, setGoats] = useRecoilState(goatsState);
   const setNumGoatsToPlace = useSetRecoilState(numGoatsToPlaceState);
-  const possibleMoves = useRecoilValue(possibleMovesState);
+  const [possibleMoves, setPossibleMoves] = useRecoilState(possibleMovesState);
   const playersTurn = useRecoilValue(playersTurnState);
 
   const pos_num: number = 5 * y + x;
@@ -74,6 +75,8 @@ function Square({ x, y }: SquareProps): JSX.Element {
     item: ItemType,
     to_pos_num: number,
   ) => void = (itemType, item, to_pos_num) => {
+    const move = getMove(item.toPlace, item.pos_num, to_pos_num);
+
     setPlayerNum((oldPlayerNum) => 3 - oldPlayerNum);
     if (item.toPlace) {
       setNumGoatsToPlace((oldNum) => oldNum - 1);
@@ -82,6 +85,26 @@ function Square({ x, y }: SquareProps): JSX.Element {
     setter((oldPieces) => {
       return oldPieces.filterNot((val) => val === item.pos_num).push(to_pos_num);
     });
+
+    console.log('POST', { move: JSON.stringify(move.toJS()) });
+    const res = postData(move);
+    res
+      .then((data: GameType) => {
+        const { playerNum, numGoatsToPlace, tigers, goats, possibleMoves } = data;
+        console.log('>>> ', {
+          playerNum,
+          numGoatsToPlace,
+          tigers: JSON.stringify(tigers.toJS()),
+          goats: JSON.stringify(goats.toJS()),
+          possibleMoves: JSON.stringify(possibleMoves.toJS()),
+        });
+        setPlayerNum(playerNum);
+        setNumGoatsToPlace(numGoatsToPlace);
+        setTigers(tigers);
+        setGoats(goats);
+        setPossibleMoves(possibleMoves);
+      })
+      .catch(console.error);
   };
 
   const [{ isOver, canDrop }, drop] = useDrop(

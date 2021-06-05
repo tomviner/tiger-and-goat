@@ -14,15 +14,24 @@ export type GameType = {
   goats: List<number>;
 };
 
+const cache = { game: [0, 0, [[0]]] };
+
 const checkResponse = (value: ApiResponse<GameType>) => {
-  const { ok, data, problem, status } = value;
+  const { ok, data, problem, status, headers } = value;
 
   if (ok) {
-    return <GameType>fromJS(data).toObject();
+    const d = <GameType>fromJS(data).toObject();
+    const { playerNum, numGoatsToPlace, history } = d;
+    cache.game = [playerNum, numGoatsToPlace, history.toJS()];
+    return d;
   }
   throw Error(`${status} ${problem}`);
 };
 
 export const getData: () => Promise<GameType> = () => {
   return api.get<GameType>('/hello').then(checkResponse);
+};
+// , game: string
+export const postData: (move: List<number>) => Promise<GameType> = (move) => {
+  return api.post<GameType>('/hello', { move, state: cache.game }).then(checkResponse);
 };

@@ -7,11 +7,11 @@ describe('2d range', () => {
     expect(range2d(2, 3)).toEqual(
       List([
         List([0, 0]),
-        List([0, 1]),
-        List([0, 2]),
         List([1, 0]),
+        List([2, 0]),
+        List([0, 1]),
         List([1, 1]),
-        List([1, 2]),
+        List([2, 1]),
       ]),
     );
   });
