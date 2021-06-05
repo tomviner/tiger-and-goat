@@ -1,13 +1,16 @@
-import _ from 'lodash';
+import { List } from 'immutable';
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { ItemTypes } from './Constants';
+import { JUMPS_GRAPH, STEPS_GRAPH } from './graph';
 import Piece from './Piece';
 import './Square.css';
 import {
   goatsState,
   numGoatsToPlaceState,
+  playerNumState,
+  playersTurnState,
   possibleMovesState,
   tigersState,
 } from './State';
@@ -23,20 +26,47 @@ export interface ItemType {
   pos_num: number;
 }
 
+const average = (a: number, b: number) => (a + b) / 2;
+
+const getMove = (toPlace: boolean, from_pos_num: number, to_pos_num: number) => {
+  if (toPlace) {
+    return List([to_pos_num]);
+  }
+  const canStepTo = STEPS_GRAPH.get(from_pos_num);
+  if (canStepTo && canStepTo.includes(to_pos_num)) {
+    return List([from_pos_num, to_pos_num]);
+  }
+
+  const canJumpTo = JUMPS_GRAPH.get(from_pos_num);
+  if (canJumpTo && canJumpTo.includes(to_pos_num)) {
+    const eaten = average(from_pos_num, to_pos_num);
+    return List([from_pos_num, eaten, to_pos_num]);
+  }
+  return List();
+};
+
 function Square({ x, y }: SquareProps): JSX.Element {
+  const [playerNum, setPlayerNum] = useRecoilState(playerNumState);
   const [tigers, setTigers] = useRecoilState(tigersState);
   const [goats, setGoats] = useRecoilState(goatsState);
   const setNumGoatsToPlace = useSetRecoilState(numGoatsToPlaceState);
   const possibleMoves = useRecoilValue(possibleMovesState);
+  const playersTurn = useRecoilValue(playersTurnState);
 
   const pos_num: number = 5 * y + x;
-
   const visible = x < 4 && y < 4;
   const diagBackward = (x + y) % 2 === 0;
 
-  const canMove = (pos_num: number) => {
-    possibleMoves;
-    return ![...tigers, ...goats].includes(pos_num);
+  const canMove = (
+    itemType: string | symbol | null,
+    item: ItemType,
+    to_pos_num: number,
+  ) => {
+    const move = getMove(item.toPlace, item.pos_num, to_pos_num);
+
+    const correctTurn = itemType === playersTurn.type;
+    const squareFree = ![...tigers.toJS(), ...goats.toJS()].includes(to_pos_num);
+    return correctTurn && squareFree && possibleMoves.includes(move);
   };
 
   const doMove: (
@@ -44,19 +74,21 @@ function Square({ x, y }: SquareProps): JSX.Element {
     item: ItemType,
     to_pos_num: number,
   ) => void = (itemType, item, to_pos_num) => {
+    setPlayerNum((oldPlayerNum) => 3 - oldPlayerNum);
     if (item.toPlace) {
       setNumGoatsToPlace((oldNum) => oldNum - 1);
     }
     const setter = itemType === ItemTypes.TIGER ? setTigers : setGoats;
     setter((oldPieces) => {
-      return [..._.filter(oldPieces, (val) => val !== item.pos_num), to_pos_num];
+      return oldPieces.filterNot((val) => val === item.pos_num).push(to_pos_num);
     });
   };
 
   const [{ isOver, canDrop }, drop] = useDrop(
     () => ({
       accept: [ItemTypes.TIGER, ItemTypes.GOAT],
-      canDrop: () => canMove(pos_num),
+      canDrop: (item, monitor) =>
+        canMove(monitor.getItemType(), item as ItemType, pos_num),
       drop: (item, monitor) => doMove(monitor.getItemType(), item as ItemType, pos_num),
       collect: (monitor) => ({
         isOver: !!monitor.isOver(),
@@ -65,7 +97,7 @@ function Square({ x, y }: SquareProps): JSX.Element {
         // item: monitor.getItem(),
       }),
     }),
-    [x, y, tigers, goats],
+    [x, y, playerNum, tigers, goats, possibleMoves],
   );
 
   const squareClsNames = getClsNames(

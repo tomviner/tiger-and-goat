@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -10,19 +10,21 @@ import {
   goatsState,
   numGoatsEatenState,
   numGoatsToPlaceState,
+  playerNumState,
+  playersTurnState,
   possibleMovesState,
   tigersState,
 } from './State';
 import { range2d } from './utils';
 
 function Board(): JSX.Element {
-  const [playerNum, setPlayerNum] = useState(0);
+  const setPlayerNum = useSetRecoilState(playerNumState);
   const setTigers = useSetRecoilState(tigersState);
   const setGoats = useSetRecoilState(goatsState);
   const setNumGoatsToPlace = useSetRecoilState(numGoatsToPlaceState);
   const setPossibleMoves = useSetRecoilState(possibleMovesState);
-  const turnPlayer = playerNum === 2 ? 'Tiger' : 'Goat';
   const numGoatsEaten = useRecoilValue(numGoatsEatenState);
+  const playersTurn = useRecoilValue(playersTurnState);
 
   useEffect(() => {
     const res = getData();
@@ -35,13 +37,13 @@ function Board(): JSX.Element {
         setGoats(goats);
         setPossibleMoves(possibleMoves);
       })
-      .catch((x) => console.error('x', x));
+      .catch(console.error);
   }, []);
 
   return (
     <>
       <DndProvider backend={HTML5Backend}>
-        <div>Turn: {turnPlayer}</div>
+        <div>Turn: {playersTurn.name}</div>
         <div>
           To place: <GoatsToPlace />
         </div>

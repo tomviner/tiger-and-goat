@@ -1,14 +1,20 @@
+import { List } from 'immutable';
 import { atom, selector } from 'recoil';
-import { NUM_GOATS } from './Constants';
+import { ItemTypes, NUM_GOATS } from './Constants';
+
+export const playerNumState = atom({
+  key: 'playerNumState',
+  default: 0,
+});
 
 export const tigersState = atom({
   key: 'tigersState',
-  default: [] as number[],
+  default: List() as List<number>,
 });
 
 export const goatsState = atom({
   key: 'goatsState',
-  default: [] as number[],
+  default: List() as List<number>,
 });
 
 export const numGoatsToPlaceState = atom({
@@ -18,7 +24,7 @@ export const numGoatsToPlaceState = atom({
 
 export const possibleMovesState = atom({
   key: 'possibleMovesState',
-  default: [] as number[][],
+  default: List() as List<List<number>>,
 });
 
 export const numGoatsEatenState = selector({
@@ -27,6 +33,16 @@ export const numGoatsEatenState = selector({
     const goats = get(goatsState);
     const numGoatsToPlace = get(numGoatsToPlaceState);
 
-    return NUM_GOATS - numGoatsToPlace - goats.length;
+    return NUM_GOATS - numGoatsToPlace - goats.size;
+  },
+});
+
+export const playersTurnState = selector({
+  key: 'playersTurnState',
+  get: ({ get }) => {
+    const playerNum = get(playerNumState);
+    const name = playerNum === 2 ? 'Tiger' : 'Goat';
+    const type = playerNum === 2 ? ItemTypes.TIGER : ItemTypes.GOAT;
+    return { name, type, isTiger: playerNum === 1, isGoat: playerNum === 2 };
   },
 });

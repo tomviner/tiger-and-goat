@@ -7,7 +7,7 @@ import { getClsNames } from './utils';
 function GoatToPlace(): JSX.Element {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.GOAT,
-    item: { toPlace: true },
+    item: { toPlace: true, pos_num: -1 },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
