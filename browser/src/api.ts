@@ -5,33 +5,36 @@ const api = create({
   baseURL: 'http://localhost:8000',
 });
 
-export type GameType = {
+export type UpdatedGameType = {
   playerNum: number;
   numGoatsToPlace: number;
-  history: List<List<number>>;
+  history: List<List<List<number>>>;
   possibleMoves: List<List<number>>;
   tigers: List<number>;
   goats: List<number>;
 };
 
-const cache = { game: [0, 0, [[0]]] };
+export type PriorGameType = {
+  playerNum: number;
+  numGoatsToPlace: number;
+  history: List<List<List<number>>>;
+};
 
-const checkResponse = (value: ApiResponse<GameType>) => {
-  const { ok, data, problem, status, headers } = value;
+const checkResponse = (value: ApiResponse<UpdatedGameType>) => {
+  const { ok, data, problem, status } = value;
 
   if (ok) {
-    const d = <GameType>fromJS(data).toObject();
-    const { playerNum, numGoatsToPlace, history } = d;
-    cache.game = [playerNum, numGoatsToPlace, history.toJS()];
-    return d;
+    return <UpdatedGameType>fromJS(data).toObject();
   }
   throw Error(`${status} ${problem}`);
 };
 
-export const getData: () => Promise<GameType> = () => {
-  return api.get<GameType>('/hello').then(checkResponse);
+export const getData: () => Promise<UpdatedGameType> = () => {
+  return api.get<UpdatedGameType>('/hello').then(checkResponse);
 };
-// , game: string
-export const postData: (move: List<number>) => Promise<GameType> = (move) => {
-  return api.post<GameType>('/hello', { move, state: cache.game }).then(checkResponse);
+export const postData: (
+  move: List<number>,
+  priorGame: PriorGameType,
+) => Promise<UpdatedGameType> = (move, priorGame) => {
+  return api.post<UpdatedGameType>('/hello', { move, priorGame }).then(checkResponse);
 };

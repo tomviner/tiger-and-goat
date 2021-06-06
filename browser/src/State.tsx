@@ -27,6 +27,11 @@ export const possibleMovesState = atom({
   default: List() as List<List<number>>,
 });
 
+export const historyState = atom({
+  key: 'historyState',
+  default: List() as List<List<List<number>>>,
+});
+
 export const numGoatsEatenState = selector({
   key: 'numGoatsEatenState',
   get: ({ get }) => {
@@ -43,6 +48,16 @@ export const playersTurnState = selector({
     const playerNum = get(playerNumState);
     const name = playerNum === 2 ? 'Tiger' : 'Goat';
     const type = playerNum === 2 ? ItemTypes.TIGER : ItemTypes.GOAT;
-    return { name, type, isTiger: playerNum === 1, isGoat: playerNum === 2 };
+    return { name, type, isTiger: playerNum === 2, isGoat: playerNum === 1 };
+  },
+});
+
+export const priorGameState = selector({
+  key: 'priorGameState',
+  get: ({ get }) => {
+    const playerNum = get(playerNumState);
+    const numGoatsToPlace = get(numGoatsToPlaceState);
+    const history = get(historyState);
+    return { playerNum, numGoatsToPlace, history };
   },
 });

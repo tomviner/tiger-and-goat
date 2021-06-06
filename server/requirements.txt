@@ -6,6 +6,7 @@ networkx
 pygraphviz
 scipy
 hug
+marshmallow
 
 pytest
 isort

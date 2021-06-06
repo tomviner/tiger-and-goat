@@ -2,17 +2,19 @@ import { List } from 'immutable';
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { GameType, postData } from './api';
+import { postData } from './api';
 import { ItemTypes } from './Constants';
 import { JUMPS_GRAPH, STEPS_GRAPH } from './graph';
 import Piece from './Piece';
 import './Square.css';
 import {
   goatsState,
+  historyState,
   numGoatsToPlaceState,
   playerNumState,
   playersTurnState,
   possibleMovesState,
+  priorGameState,
   tigersState,
 } from './State';
 import { getClsNames } from './utils';
@@ -52,6 +54,8 @@ function Square({ x, y }: SquareProps): JSX.Element {
   const [goats, setGoats] = useRecoilState(goatsState);
   const setNumGoatsToPlace = useSetRecoilState(numGoatsToPlaceState);
   const [possibleMoves, setPossibleMoves] = useRecoilState(possibleMovesState);
+  const setHistory = useSetRecoilState(historyState);
+  const priorGame = useRecoilValue(priorGameState);
   const playersTurn = useRecoilValue(playersTurnState);
 
   const pos_num: number = 5 * y + x;
@@ -86,23 +90,26 @@ function Square({ x, y }: SquareProps): JSX.Element {
       return oldPieces.filterNot((val) => val === item.pos_num).push(to_pos_num);
     });
 
-    console.log('POST', { move: JSON.stringify(move.toJS()) });
-    const res = postData(move);
+    console.log('POST', JSON.stringify({ move, priorGame }));
+    const res = postData(move, priorGame);
     res
-      .then((data: GameType) => {
-        const { playerNum, numGoatsToPlace, tigers, goats, possibleMoves } = data;
+      .then((updatedGame) => {
+        const { playerNum, numGoatsToPlace, tigers, goats, possibleMoves, history } =
+          updatedGame;
         console.log('>>> ', {
           playerNum,
           numGoatsToPlace,
           tigers: JSON.stringify(tigers.toJS()),
           goats: JSON.stringify(goats.toJS()),
           possibleMoves: JSON.stringify(possibleMoves.toJS()),
+          history: JSON.stringify(history.toJS()),
         });
         setPlayerNum(playerNum);
         setNumGoatsToPlace(numGoatsToPlace);
         setTigers(tigers);
         setGoats(goats);
         setPossibleMoves(possibleMoves);
+        setHistory(history);
       })
       .catch(console.error);
   };
@@ -120,7 +127,7 @@ function Square({ x, y }: SquareProps): JSX.Element {
         // item: monitor.getItem(),
       }),
     }),
-    [x, y, playerNum, tigers, goats, possibleMoves],
+    [x, y, playerNum, tigers, goats, possibleMoves, history, priorGame],
   );
 
   const squareClsNames = getClsNames(
@@ -144,6 +151,7 @@ function Square({ x, y }: SquareProps): JSX.Element {
   return (
     <div className={squareClsNames} key={pos_num} ref={drop}>
       {piece}
+      {pos_num}
     </div>
   );
 }

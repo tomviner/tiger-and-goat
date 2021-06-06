@@ -19,3 +19,22 @@ SLOW
 get positions by piece
 canonicalise
 
+---
+
+server
+
+- return ai_move
+- return winner
+- return illegal move
+- fix eat 5th tiger bug
+
+---
+
+browser
+
+- support playing as tiger
+- rename, split GoatsToPlace
+- pending move, send, animate
+- split square
+- folders: components, services, etc
+

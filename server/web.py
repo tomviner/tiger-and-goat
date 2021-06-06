@@ -9,7 +9,7 @@ from hug.store import InMemoryStore
 from game import TigerAndGoat
 
 
-def get_game(request, session, state=None):
+def get_game(request, session, priorGame=None):
     kw1, kw2 = {}, {}
     if 0:
         kw1 = {'tt': TT()}
@@ -18,16 +18,20 @@ def get_game(request, session, state=None):
     tiger_ai = Negamax(6, **kw2)
     game = TigerAndGoat([Human_Player('goat'), AI_Player(tiger_ai, 'tiger')])
 
-    hdr_game = request.headers.get('game')
+    hdr_game = request.headers.get('GAME')
     req_game = request.cookies.get('game')
     sess_game = session.get('game')
 
-    print(f'{request.cookies=} {state=} {hdr_game=} {req_game=} {sess_game=}')
+    print(f'{request.cookies=} {priorGame=} {hdr_game=} {req_game=} {sess_game=}')
 
     data = None
 
-    if state:
-        data = state
+    if priorGame:
+        data = [
+            priorGame['playerNum'],
+            priorGame['numGoatsToPlace'],
+            priorGame['history'],
+        ]
 
     elif hdr_game:
         data = json.loads((hdr_game.encode()))
@@ -66,8 +70,14 @@ def hello(session: hug.directives.session, request, response):
 
 @hug.post()
 @hug.cli()
-def hello(move: list[int], state, session: hug.directives.session, request, response):
-    game = get_game(request, session, state)
+def hello(
+    move: list[int],
+    priorGame,
+    session: hug.directives.session,
+    request,
+    response,
+):
+    game = get_game(request, session, priorGame)
 
     game.play_move(move)
     if not game.is_over():

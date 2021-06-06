@@ -2,12 +2,13 @@ import React, { useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSetRecoilState } from 'recoil';
-import { GameType, getData } from './api';
+import { getData } from './api';
 import './board.css';
 import GoatsToPlace from './GoatsToPlace';
 import Square from './Square';
 import {
   goatsState,
+  historyState,
   numGoatsToPlaceState,
   playerNumState,
   possibleMovesState,
@@ -21,24 +22,31 @@ function Board(): JSX.Element {
   const setGoats = useSetRecoilState(goatsState);
   const setNumGoatsToPlace = useSetRecoilState(numGoatsToPlaceState);
   const setPossibleMoves = useSetRecoilState(possibleMovesState);
+  const setHistory = useSetRecoilState(historyState);
 
   useEffect(() => {
     const res = getData();
     res
-      .then((data: GameType) => {
-        const { playerNum, numGoatsToPlace, tigers, goats, possibleMoves } = data;
-        console.log('GET', {
-          playerNum,
-          numGoatsToPlace,
-          tigers: JSON.stringify(tigers.toJS()),
-          goats: JSON.stringify(goats.toJS()),
-          possibleMoves: JSON.stringify(possibleMoves.toJS()),
-        });
+      .then((updatedGame) => {
+        const { playerNum, numGoatsToPlace, tigers, goats, possibleMoves, history } =
+          updatedGame;
+        console.log(
+          'GET',
+          JSON.stringify({
+            playerNum,
+            numGoatsToPlace,
+            tigers: JSON.stringify(tigers.toJS()),
+            goats: JSON.stringify(goats.toJS()),
+            possibleMoves: JSON.stringify(possibleMoves.toJS()),
+            history: JSON.stringify(history.toJS()),
+          }),
+        );
         setPlayerNum(playerNum);
         setNumGoatsToPlace(numGoatsToPlace);
         setTigers(tigers);
         setGoats(goats);
         setPossibleMoves(possibleMoves);
+        setHistory(history);
       })
       .catch(console.error);
   }, []);
