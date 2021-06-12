@@ -9,15 +9,15 @@ import Piece from './Piece';
 import './Square.css';
 import {
   goatsState,
-  historyState,
   numGoatsToPlaceState,
   playerNumState,
   playersTurnState,
   possibleMovesState,
-  priorGameState,
+  stateOfGameState,
   tigersState,
+  updatedGameState,
 } from './State';
-import { getClsNames } from './utils';
+import { average, getClsNames } from './utils';
 
 export interface SquareProps {
   x: number;
@@ -28,8 +28,6 @@ export interface ItemType {
   toPlace: boolean;
   pos_num: number;
 }
-
-const average = (a: number, b: number) => (a + b) / 2;
 
 const getMove = (toPlace: boolean, from_pos_num: number, to_pos_num: number) => {
   if (toPlace) {
@@ -50,12 +48,12 @@ const getMove = (toPlace: boolean, from_pos_num: number, to_pos_num: number) => 
 
 function Square({ x, y }: SquareProps): JSX.Element {
   const [playerNum, setPlayerNum] = useRecoilState(playerNumState);
-  const [tigers, setTigers] = useRecoilState(tigersState);
-  const [goats, setGoats] = useRecoilState(goatsState);
+  const tigers = useRecoilValue(tigersState);
+  const goats = useRecoilValue(goatsState);
   const setNumGoatsToPlace = useSetRecoilState(numGoatsToPlaceState);
-  const [possibleMoves, setPossibleMoves] = useRecoilState(possibleMovesState);
-  const setHistory = useSetRecoilState(historyState);
-  const priorGame = useRecoilValue(priorGameState);
+  const setUpdatedGame = useSetRecoilState(updatedGameState);
+  const possibleMoves = useRecoilValue(possibleMovesState);
+  const stateOfGame = useRecoilValue(stateOfGameState);
   const playersTurn = useRecoilValue(playersTurnState);
 
   const pos_num: number = 5 * y + x;
@@ -70,7 +68,7 @@ function Square({ x, y }: SquareProps): JSX.Element {
     const move = getMove(item.toPlace, item.pos_num, to_pos_num);
 
     const correctTurn = itemType === playersTurn.type;
-    const squareFree = ![...tigers.toJS(), ...goats.toJS()].includes(to_pos_num);
+    const squareFree = !tigers.concat(goats).includes(to_pos_num);
     return correctTurn && squareFree && possibleMoves.includes(move);
   };
 
@@ -85,33 +83,14 @@ function Square({ x, y }: SquareProps): JSX.Element {
     if (item.toPlace) {
       setNumGoatsToPlace((oldNum) => oldNum - 1);
     }
-    const setter = itemType === ItemTypes.TIGER ? setTigers : setGoats;
-    setter((oldPieces) => {
-      return oldPieces.filterNot((val) => val === item.pos_num).push(to_pos_num);
-    });
+    // const setter = itemType === ItemTypes.TIGER ? setTigers : setGoats;
+    // setter((oldPieces) => {
+    //   return oldPieces.filterNot((val) => val === item.pos_num).push(to_pos_num);
+    // });
 
-    console.log('POST', JSON.stringify({ move, priorGame }));
-    const res = postData(move, priorGame);
-    res
-      .then((updatedGame) => {
-        const { playerNum, numGoatsToPlace, tigers, goats, possibleMoves, history } =
-          updatedGame;
-        console.log('>>> ', {
-          playerNum,
-          numGoatsToPlace,
-          tigers: JSON.stringify(tigers.toJS()),
-          goats: JSON.stringify(goats.toJS()),
-          possibleMoves: JSON.stringify(possibleMoves.toJS()),
-          history: JSON.stringify(history.toJS()),
-        });
-        setPlayerNum(playerNum);
-        setNumGoatsToPlace(numGoatsToPlace);
-        setTigers(tigers);
-        setGoats(goats);
-        setPossibleMoves(possibleMoves);
-        setHistory(history);
-      })
-      .catch(console.error);
+    console.log('POST', JSON.stringify({ move, stateOfGame }));
+    const res = postData(stateOfGame, move);
+    res.then(setUpdatedGame).catch(console.error);
   };
 
   const [{ isOver, canDrop }, drop] = useDrop(
@@ -123,11 +102,9 @@ function Square({ x, y }: SquareProps): JSX.Element {
       collect: (monitor) => ({
         isOver: !!monitor.isOver(),
         canDrop: !!monitor.canDrop(),
-        // itemType: monitor.getItemType(),
-        // item: monitor.getItem(),
       }),
     }),
-    [x, y, playerNum, tigers, goats, possibleMoves, history, priorGame],
+    [x, y, playerNum, possibleMoves, history],
   );
 
   const squareClsNames = getClsNames(

@@ -1,20 +1,10 @@
 import { List } from 'immutable';
-import { atom, selector } from 'recoil';
+import { atom, DefaultValue, selector } from 'recoil';
 import { ItemTypes, NUM_GOATS } from './Constants';
 
 export const playerNumState = atom({
   key: 'playerNumState',
-  default: 0,
-});
-
-export const tigersState = atom({
-  key: 'tigersState',
-  default: List() as List<number>,
-});
-
-export const goatsState = atom({
-  key: 'goatsState',
-  default: List() as List<number>,
+  default: 1,
 });
 
 export const numGoatsToPlaceState = atom({
@@ -30,6 +20,24 @@ export const possibleMovesState = atom({
 export const historyState = atom({
   key: 'historyState',
   default: List() as List<List<List<number>>>,
+});
+
+export const tigersState = selector({
+  key: 'tigersState',
+  get: ({ get }) => {
+    const history = get(historyState);
+    const lastPieces = history.last(List()) as List<List<number>>;
+    return lastPieces.get(0, List());
+  },
+});
+
+export const goatsState = selector({
+  key: 'goatsState',
+  get: ({ get }) => {
+    const history = get(historyState);
+    const lastPieces = history.last(List()) as List<List<number>>;
+    return lastPieces.get(1, List()) as List<number>;
+  },
 });
 
 export const numGoatsEatenState = selector({
@@ -52,12 +60,46 @@ export const playersTurnState = selector({
   },
 });
 
-export const priorGameState = selector({
-  key: 'priorGameState',
+export type StateOfGameType = {
+  playerNum: number;
+  numGoatsToPlace: number;
+  history: List<List<List<number>>>;
+};
+
+export const stateOfGameState = selector<StateOfGameType>({
+  key: 'stateOfGameState',
   get: ({ get }) => {
     const playerNum = get(playerNumState);
     const numGoatsToPlace = get(numGoatsToPlaceState);
     const history = get(historyState);
     return { playerNum, numGoatsToPlace, history };
+  },
+  set: ({ set }, updatedGame) => {
+    if (!(updatedGame instanceof DefaultValue)) {
+      const { playerNum, numGoatsToPlace, history } = updatedGame;
+      set(playerNumState, playerNum);
+      set(numGoatsToPlaceState, numGoatsToPlace);
+      set(historyState, history);
+    }
+  },
+});
+
+export interface UpdatedGameType extends StateOfGameType {
+  possibleMoves: List<List<number>>;
+}
+
+export const updatedGameState = selector<UpdatedGameType>({
+  key: 'updatedGameState',
+  get: ({ get }) => {
+    const stateOfGame = get(stateOfGameState);
+    const possibleMoves = get(possibleMovesState);
+    return { ...stateOfGame, possibleMoves };
+  },
+  set: ({ set }, updatedGame) => {
+    if (!(updatedGame instanceof DefaultValue)) {
+      const { possibleMoves } = updatedGame;
+      set(stateOfGameState, updatedGame);
+      set(possibleMovesState, possibleMoves);
+    }
   },
 });

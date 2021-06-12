@@ -34,3 +34,5 @@ export const mapToFunction: <T, F>(seq: List<T>, func: (x: T) => F) => Map<T, F>
 
 export const mapToValue: <T, V>(seq: List<T>, value: V) => Map<T, V> = (seq, value) =>
   Map(seq.map((x) => [x, value]));
+
+export const average = (a: number, b: number): number => (a + b) / 2;

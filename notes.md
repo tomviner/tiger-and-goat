@@ -36,5 +36,6 @@ browser
 - rename, split GoatsToPlace
 - pending move, send, animate
 - split square
+- fix drop target offset
 - folders: components, services, etc
 

@@ -75,16 +75,13 @@ class TigerAndGoat(TwoPlayersGame):
         return (self.nplayer, self.goats_to_place, history)
 
     def as_dict(self):
-        nplayer, goats_to_place, history = self.ttentry()
-        tigers, goats = history[-1]
+        nplayer, goats_to_place, history = self.ttentry(json_safe=True)
 
         return {
             'playerNum': nplayer,
             'numGoatsToPlace': goats_to_place,
             'possibleMoves': self.possible_moves(),
             'history': history,
-            'tigers': sorted(tigers),
-            'goats': sorted(goats),
         }
 
     def ttrestore(self, entry):
@@ -228,19 +225,22 @@ class TigerAndGoat(TwoPlayersGame):
 
     @log
     def scoring(self):
+        # Logic written from tiger point of view, and flipped at end.
+        # Higher score, better for tigers.
+
         mobile_tigers = self.mobile_tigers()
         # if tiger just made a move, history may appear to preclude the reverse move,
         # however once goat has moved, this may not be true. So don't allow tiger to
         # appear lost until it's tiger's go
-        if not mobile_tigers:
-            mobile_tigers = int(self.goats_go())
+        if not mobile_tigers and self.goats_go():
+            mobile_tigers = 1
 
-        if self.goats_eaten() >= NUM_EATEN_LOSE:
-            score = 100
-        elif not mobile_tigers:
-            score = -100
-        else:
-            score = 10 * self.goats_eaten() + mobile_tigers
+        # if self.goats_eaten() >= NUM_EATEN_LOSE:
+        #     score = 100
+        # elif not mobile_tigers:
+        #     score = -100
+        # else:
+        score = 10 * self.goats_eaten() + mobile_tigers
         if self.goats_go():
             score *= -1
         return score

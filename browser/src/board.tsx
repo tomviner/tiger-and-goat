@@ -1,59 +1,36 @@
 import React, { useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { useSetRecoilState } from 'recoil';
-import { getData } from './api';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { getData, postData } from './api';
 import './board.css';
+import GoatsEaten from './GoatsEaten';
 import GoatsToPlace from './GoatsToPlace';
 import Square from './Square';
-import {
-  goatsState,
-  historyState,
-  numGoatsToPlaceState,
-  playerNumState,
-  possibleMovesState,
-  tigersState,
-} from './State';
+import { playersTurnState, stateOfGameState, updatedGameState } from './State';
 import { range2d } from './utils';
 
 function Board(): JSX.Element {
-  const setPlayerNum = useSetRecoilState(playerNumState);
-  const setTigers = useSetRecoilState(tigersState);
-  const setGoats = useSetRecoilState(goatsState);
-  const setNumGoatsToPlace = useSetRecoilState(numGoatsToPlaceState);
-  const setPossibleMoves = useSetRecoilState(possibleMovesState);
-  const setHistory = useSetRecoilState(historyState);
+  const setUpdatedGame = useSetRecoilState(updatedGameState);
+  const stateOfGame = useRecoilValue(stateOfGameState);
+  const playersTurn = useRecoilValue(playersTurnState);
 
   useEffect(() => {
     const res = getData();
-    res
-      .then((updatedGame) => {
-        const { playerNum, numGoatsToPlace, tigers, goats, possibleMoves, history } =
-          updatedGame;
-        console.log(
-          'GET',
-          JSON.stringify({
-            playerNum,
-            numGoatsToPlace,
-            tigers: JSON.stringify(tigers.toJS()),
-            goats: JSON.stringify(goats.toJS()),
-            possibleMoves: JSON.stringify(possibleMoves.toJS()),
-            history: JSON.stringify(history.toJS()),
-          }),
-        );
-        setPlayerNum(playerNum);
-        setNumGoatsToPlace(numGoatsToPlace);
-        setTigers(tigers);
-        setGoats(goats);
-        setPossibleMoves(possibleMoves);
-        setHistory(history);
-      })
-      .catch(console.error);
+    res.then(setUpdatedGame).catch(console.error);
   }, []);
+
+  const swap = () => {
+    const res = postData(stateOfGame, null);
+    res.then(setUpdatedGame).catch(console.error);
+  };
 
   return (
     <>
       <DndProvider backend={HTML5Backend}>
+        <div>
+          Turn: <b>{playersTurn.name}</b> <button onClick={swap}>Swap</button>
+        </div>
         <GoatsToPlace />
         <div className={'gameBoard'}>
           {range2d(5, 5)
@@ -63,6 +40,7 @@ function Board(): JSX.Element {
             })}
         </div>
       </DndProvider>
+      <GoatsEaten />
     </>
   );
 }
