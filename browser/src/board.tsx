@@ -29,7 +29,8 @@ function Board(): JSX.Element {
     <>
       <DndProvider backend={HTML5Backend}>
         <div>
-          Turn: <b>{playersTurn.name}</b> <button onClick={swap}>Swap</button>
+          Turn: <b>{playersTurn.name}</b>
+          <button onClick={swap}>Swap</button>
         </div>
         <GoatsToPlace />
         <div className={'gameBoard'}>

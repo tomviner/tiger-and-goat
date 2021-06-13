@@ -38,14 +38,12 @@ api.http.add_middleware(hug.middleware.CORSMiddleware(api))
 
 
 @hug.get()
-@hug.cli()
 def start():
     game = get_game()
     return game.as_dict()
 
 
 @hug.post()
-@hug.cli()
 def move(stateOfGame, move=None):
     have_client_move = bool(move)
 

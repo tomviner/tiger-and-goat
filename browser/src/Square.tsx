@@ -26,22 +26,22 @@ export interface SquareProps {
 
 export interface ItemType {
   toPlace: boolean;
-  pos_num: number;
+  posNum: number;
 }
 
-const getMove = (toPlace: boolean, from_pos_num: number, to_pos_num: number) => {
+const getMove = (toPlace: boolean, fromPosNum: number, toPosNum: number) => {
   if (toPlace) {
-    return List([to_pos_num]);
+    return List([toPosNum]);
   }
-  const canStepTo = STEPS_GRAPH.get(from_pos_num);
-  if (canStepTo && canStepTo.includes(to_pos_num)) {
-    return List([from_pos_num, to_pos_num]);
+  const canStepTo = STEPS_GRAPH.get(fromPosNum);
+  if (canStepTo && canStepTo.includes(toPosNum)) {
+    return List([fromPosNum, toPosNum]);
   }
 
-  const canJumpTo = JUMPS_GRAPH.get(from_pos_num);
-  if (canJumpTo && canJumpTo.includes(to_pos_num)) {
-    const eaten = average(from_pos_num, to_pos_num);
-    return List([from_pos_num, eaten, to_pos_num]);
+  const canJumpTo = JUMPS_GRAPH.get(fromPosNum);
+  if (canJumpTo && canJumpTo.includes(toPosNum)) {
+    const eaten = average(fromPosNum, toPosNum);
+    return List([fromPosNum, eaten, toPosNum]);
   }
   return List();
 };
@@ -56,28 +56,28 @@ function Square({ x, y }: SquareProps): JSX.Element {
   const stateOfGame = useRecoilValue(stateOfGameState);
   const playersTurn = useRecoilValue(playersTurnState);
 
-  const pos_num: number = 5 * y + x;
+  const posNum: number = 5 * y + x;
   const visible = x < 4 && y < 4;
   const diagBackward = (x + y) % 2 === 0;
 
   const canMove = (
     itemType: string | symbol | null,
     item: ItemType,
-    to_pos_num: number,
+    toPosNum: number,
   ) => {
-    const move = getMove(item.toPlace, item.pos_num, to_pos_num);
+    const move = getMove(item.toPlace, item.posNum, toPosNum);
 
     const correctTurn = itemType === playersTurn.type;
-    const squareFree = !tigers.concat(goats).includes(to_pos_num);
+    const squareFree = !tigers.concat(goats).includes(toPosNum);
     return correctTurn && squareFree && possibleMoves.includes(move);
   };
 
   const doMove: (
     itemType: string | symbol | null,
     item: ItemType,
-    to_pos_num: number,
-  ) => void = (itemType, item, to_pos_num) => {
-    const move = getMove(item.toPlace, item.pos_num, to_pos_num);
+    toPosNum: number,
+  ) => void = (itemType, item, toPosNum) => {
+    const move = getMove(item.toPlace, item.posNum, toPosNum);
 
     setPlayerNum((oldPlayerNum) => 3 - oldPlayerNum);
     if (item.toPlace) {
@@ -85,7 +85,7 @@ function Square({ x, y }: SquareProps): JSX.Element {
     }
     // const setter = itemType === ItemTypes.TIGER ? setTigers : setGoats;
     // setter((oldPieces) => {
-    //   return oldPieces.filterNot((val) => val === item.pos_num).push(to_pos_num);
+    //   return oldPieces.filterNot((val) => val === item.posNum).push(toPosNum);
     // });
 
     console.log('POST', JSON.stringify({ move, stateOfGame }));
@@ -97,8 +97,8 @@ function Square({ x, y }: SquareProps): JSX.Element {
     () => ({
       accept: [ItemTypes.TIGER, ItemTypes.GOAT],
       canDrop: (item, monitor) =>
-        canMove(monitor.getItemType(), item as ItemType, pos_num),
-      drop: (item, monitor) => doMove(monitor.getItemType(), item as ItemType, pos_num),
+        canMove(monitor.getItemType(), item as ItemType, posNum),
+      drop: (item, monitor) => doMove(monitor.getItemType(), item as ItemType, posNum),
       collect: (monitor) => ({
         isOver: !!monitor.isOver(),
         canDrop: !!monitor.canDrop(),
@@ -110,7 +110,6 @@ function Square({ x, y }: SquareProps): JSX.Element {
   const squareClsNames = getClsNames(
     {
       visibleSquare: visible,
-      hiddenSquare: !visible,
       diagForward: visible && !diagBackward,
       diagBackward: visible && diagBackward,
       isOver,
@@ -119,16 +118,16 @@ function Square({ x, y }: SquareProps): JSX.Element {
     'square',
   );
 
-  const piece = tigers.includes(pos_num) ? (
-    <Piece type="tiger" pos_num={pos_num} />
-  ) : goats.includes(pos_num) ? (
-    <Piece type="goat" pos_num={pos_num} />
+  const piece = tigers.includes(posNum) ? (
+    <Piece type="tiger" posNum={posNum} />
+  ) : goats.includes(posNum) ? (
+    <Piece type="goat" posNum={posNum} />
   ) : null;
 
   return (
-    <div className={squareClsNames} key={pos_num} ref={drop}>
+    <div className={squareClsNames} key={posNum} ref={drop}>
       {piece}
-      {pos_num}
+      {posNum}
     </div>
   );
 }

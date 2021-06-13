@@ -1,7 +1,7 @@
 // Compiled board move graphs using pos nums. See server tests for how these were formed
 import { List, Map } from 'immutable';
 
-// Maps a board pos_num to the pos_nums that can be directly stepped to
+// Maps a board posNum to the posNums that can be directly stepped to
 export const STEPS_GRAPH = Map<number, List<number>>(
   List.of(
     [0, List.of(1, 5, 6)],
@@ -32,7 +32,7 @@ export const STEPS_GRAPH = Map<number, List<number>>(
   ),
 );
 
-// Maps a board pos_num to the pos_nums that a tiger can jump to
+// Maps a board posNum to the posNums that a tiger can jump to
 export const JUMPS_GRAPH = Map<number, List<number>>(
   List.of(
     [0, List.of(2, 10, 12)],

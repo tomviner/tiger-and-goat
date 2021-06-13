@@ -5,13 +5,13 @@ import { getClsNames } from './utils';
 
 export interface PieceProps {
   type: string;
-  pos_num: number;
+  posNum: number;
 }
 
-function Piece({ type, pos_num }: PieceProps): JSX.Element {
+function Piece({ type, posNum }: PieceProps): JSX.Element {
   const [{ isDragging }, drag] = useDrag(() => ({
     type,
-    item: { pos_num, toPlace: false },
+    item: { posNum, toPlace: false },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
