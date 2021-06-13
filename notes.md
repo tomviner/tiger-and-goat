@@ -26,16 +26,17 @@ server
 - return ai_move
 - return winner
 - return illegal move
-- fix eat 5th tiger bug
+- fix tiger eat 5th goat bug
+- history ignored?
 
 ---
 
 browser
 
-- support playing as tiger
-- rename, split GoatsToPlace
-- pending move, send, animate
+- pending move (fix eaten bug), send, animate
 - split square
 - fix drop target offset
 - folders: components, services, etc
-
+- human v human
+- ai v ai mode
+- touch event mode

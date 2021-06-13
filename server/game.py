@@ -90,6 +90,7 @@ class TigerAndGoat(TwoPlayersGame):
         canonical = history[-1]
 
         self.pieces = Pieces(*canonical)
+        history = [tuple(map(frozenset, pieces)) for pieces in history]
         self.history = deque(history, maxlen=self.history_max_len)
 
     def initial_pieces(self):
