@@ -17,6 +17,11 @@ export const possibleMovesState = atom({
   default: List() as List<List<number>>,
 });
 
+export const resultState = atom({
+  key: 'resultState',
+  default: '',
+});
+
 export const historyState = atom({
   key: 'historyState',
   default: List() as List<List<List<number>>>,
@@ -86,6 +91,7 @@ export const stateOfGameState = selector<StateOfGameType>({
 
 export interface UpdatedGameType extends StateOfGameType {
   possibleMoves: List<List<number>>;
+  result: string;
 }
 
 export const updatedGameState = selector<UpdatedGameType>({
@@ -93,13 +99,15 @@ export const updatedGameState = selector<UpdatedGameType>({
   get: ({ get }) => {
     const stateOfGame = get(stateOfGameState);
     const possibleMoves = get(possibleMovesState);
-    return { ...stateOfGame, possibleMoves };
+    const result = get(resultState);
+    return { ...stateOfGame, possibleMoves, result };
   },
   set: ({ set }, updatedGame) => {
     if (!(updatedGame instanceof DefaultValue)) {
-      const { possibleMoves } = updatedGame;
+      const { possibleMoves, result } = updatedGame;
       set(stateOfGameState, updatedGame);
       set(possibleMovesState, possibleMoves);
+      set(resultState, result);
     }
   },
 });

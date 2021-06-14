@@ -6,3 +6,10 @@
     justify-content: center;
     padding-top: 50px;
 }
+
+
+.result{
+    color: red;
+    text-transform: uppercase;
+    font-size: xx-large;
+}

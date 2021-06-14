@@ -4,6 +4,14 @@ from constants import GOAT_CHAR, TIGER_CHAR
 
 
 class Pieces(MutableMapping):
+    """Mapping from posNum --> piece char.
+
+    Additional attributes:
+    - canonical: two-tuple of frozensets of posNums (tigers, goats)
+    - tigers/goats: set of posNums occupied
+    - inverse: dict of piece char --> set of posNums occupied
+    """
+
     def __init__(self, tigers=(), goats=()):
         self.tigers = set(tigers)
         self.goats = set(goats)

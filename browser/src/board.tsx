@@ -7,13 +7,19 @@ import './board.css';
 import GoatsEaten from './GoatsEaten';
 import GoatsToPlace from './GoatsToPlace';
 import Square from './Square';
-import { playersTurnState, stateOfGameState, updatedGameState } from './State';
+import {
+  playersTurnState,
+  resultState,
+  stateOfGameState,
+  updatedGameState,
+} from './State';
 import { range2d } from './utils';
 
 function Board(): JSX.Element {
   const setUpdatedGame = useSetRecoilState(updatedGameState);
   const stateOfGame = useRecoilValue(stateOfGameState);
   const playersTurn = useRecoilValue(playersTurnState);
+  const result = useRecoilValue(resultState);
 
   useEffect(() => {
     const res = getData();
@@ -28,6 +34,7 @@ function Board(): JSX.Element {
   return (
     <>
       <DndProvider backend={HTML5Backend}>
+        <div className="result">{result}</div>
         <div>
           Turn: <b>{playersTurn.name}</b>
           <button onClick={swap}>Swap</button>

@@ -80,8 +80,9 @@ class TigerAndGoat(TwoPlayersGame):
         return {
             'playerNum': nplayer,
             'numGoatsToPlace': goats_to_place,
-            'possibleMoves': self.possible_moves(),
             'history': history,
+            'possibleMoves': self.possible_moves(),
+            'result': self.get_result_name(),
         }
 
     def ttrestore(self, entry):
@@ -223,6 +224,15 @@ class TigerAndGoat(TwoPlayersGame):
             print('goat cannot move, A DRAW!')
         score = abs(self.scoring())
         print('score:', score, 'x' * score)
+
+    def get_result_name(self):
+        if self.tiger_wins():
+            return 'tiger wins'
+        elif self.goat_wins():
+            return 'goat    wins'
+        elif self.is_draw():
+            return "draw (as goat can't move)"
+        return ''
 
     @log
     def scoring(self):

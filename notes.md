@@ -24,10 +24,8 @@ canonicalise
 server
 
 - return ai_move
-- return winner
 - return illegal move
 - fix tiger eat 5th goat bug
-- history ignored?
 
 ---
 
