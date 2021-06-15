@@ -1,7 +1,7 @@
 import { List } from 'immutable';
 import React from 'react';
 import { useDrop } from 'react-dnd';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { postData } from './api';
 import { ItemTypes } from './Constants';
 import { JUMPS_GRAPH, STEPS_GRAPH } from './graph';
@@ -9,7 +9,6 @@ import Piece from './Piece';
 import './Square.css';
 import {
   goatsState,
-  numGoatsToPlaceState,
   playerNumState,
   playersTurnState,
   possibleMovesState,
@@ -47,10 +46,9 @@ const getMove = (toPlace: boolean, fromPosNum: number, toPosNum: number) => {
 };
 
 function Square({ x, y }: SquareProps): JSX.Element {
-  const [playerNum, setPlayerNum] = useRecoilState(playerNumState);
+  const playerNum = useRecoilValue(playerNumState);
   const tigers = useRecoilValue(tigersState);
   const goats = useRecoilValue(goatsState);
-  const setNumGoatsToPlace = useSetRecoilState(numGoatsToPlaceState);
   const setUpdatedGame = useSetRecoilState(updatedGameState);
   const possibleMoves = useRecoilValue(possibleMovesState);
   const stateOfGame = useRecoilValue(stateOfGameState);
@@ -79,10 +77,10 @@ function Square({ x, y }: SquareProps): JSX.Element {
   ) => void = (itemType, item, toPosNum) => {
     const move = getMove(item.toPlace, item.posNum, toPosNum);
 
-    setPlayerNum((oldPlayerNum) => 3 - oldPlayerNum);
-    if (item.toPlace) {
-      setNumGoatsToPlace((oldNum) => oldNum - 1);
-    }
+    // setPlayerNum((oldPlayerNum) => 3 - oldPlayerNum);
+    // if (item.toPlace) {
+    //   setNumGoatsToPlace((oldNum) => oldNum - 1);
+    // }
     // const setter = itemType === ItemTypes.TIGER ? setTigers : setGoats;
     // setter((oldPieces) => {
     //   return oldPieces.filterNot((val) => val === item.posNum).push(toPosNum);
