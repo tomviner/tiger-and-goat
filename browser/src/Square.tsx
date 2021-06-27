@@ -1,4 +1,4 @@
-import { List } from 'immutable';
+import { List, Map } from 'immutable';
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -9,6 +9,8 @@ import Piece from './Piece';
 import './Square.css';
 import {
   goatsState,
+  historyState,
+  numGoatsToPlaceState,
   playerNumState,
   playersTurnState,
   possibleMovesState,
@@ -53,6 +55,8 @@ function Square({ x, y }: SquareProps): JSX.Element {
   const possibleMoves = useRecoilValue(possibleMovesState);
   const stateOfGame = useRecoilValue(stateOfGameState);
   const playersTurn = useRecoilValue(playersTurnState);
+  const history = useRecoilValue(historyState);
+  const numGoatsToPlace = useRecoilValue(numGoatsToPlaceState);
 
   const posNum: number = 5 * y + x;
   const visible = x < 4 && y < 4;
@@ -75,16 +79,49 @@ function Square({ x, y }: SquareProps): JSX.Element {
     item: ItemType,
     toPosNum: number,
   ) => void = (itemType, item, toPosNum) => {
-    const move = getMove(item.toPlace, item.posNum, toPosNum);
+    const fromPosNum = item.posNum;
+    const move = getMove(item.toPlace, fromPosNum, toPosNum);
+    console.log({ fromPosNum, toPosNum });
 
-    // setPlayerNum((oldPlayerNum) => 3 - oldPlayerNum);
-    // if (item.toPlace) {
-    //   setNumGoatsToPlace((oldNum) => oldNum - 1);
-    // }
-    // const setter = itemType === ItemTypes.TIGER ? setTigers : setGoats;
-    // setter((oldPieces) => {
-    //   return oldPieces.filterNot((val) => val === item.posNum).push(toPosNum);
-    // });
+    const newPlayerNum = 3 - playerNum;
+    const newNumGoatsToPlace = item.toPlace ? numGoatsToPlace - 1 : numGoatsToPlace;
+
+    const applyPlace = () => {
+      return List.of(tigers, goats.push(toPosNum));
+    };
+    const applyStep = () => {
+      if (itemType === ItemTypes.TIGER) {
+        return List.of(
+          tigers.filterNot((val) => val === fromPosNum).push(toPosNum),
+          goats,
+        );
+      } else {
+        return List.of(
+          tigers,
+          goats.filterNot((val) => val === fromPosNum).push(toPosNum),
+        );
+      }
+    };
+    const applyJump = () => {
+      const eaten = move.get(1, -1);
+      return List.of(
+        tigers.filterNot((val) => val === fromPosNum).push(toPosNum),
+        goats.filterNot((val) => val === eaten),
+      );
+    };
+
+    const applyMoveMap = Map(List.of([1, applyPlace], [2, applyStep], [3, applyJump]));
+    const applyMove = applyMoveMap.get(move.size, () => List());
+    const newPieces = applyMove();
+
+    const newHistory = history.push(newPieces);
+    setUpdatedGame({
+      playerNum: newPlayerNum,
+      numGoatsToPlace: newNumGoatsToPlace,
+      history: newHistory,
+      possibleMoves: List(),
+      result: '',
+    });
 
     console.log('POST', JSON.stringify({ move, stateOfGame }));
     const res = postData(stateOfGame, move);
@@ -117,9 +154,9 @@ function Square({ x, y }: SquareProps): JSX.Element {
   );
 
   const piece = tigers.includes(posNum) ? (
-    <Piece type="tiger" posNum={posNum} />
+    <Piece type={ItemTypes.TIGER} posNum={posNum} />
   ) : goats.includes(posNum) ? (
-    <Piece type="goat" posNum={posNum} />
+    <Piece type={ItemTypes.GOAT} posNum={posNum} />
   ) : null;
 
   return (

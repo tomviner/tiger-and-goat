@@ -41,7 +41,7 @@ export const goatsState = selector({
   get: ({ get }) => {
     const history = get(historyState);
     const lastPieces = history.last(List()) as List<List<number>>;
-    return lastPieces.get(1, List()) as List<number>;
+    return lastPieces.get(1, List());
   },
 });
 
