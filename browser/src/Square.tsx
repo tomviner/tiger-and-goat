@@ -1,4 +1,4 @@
-import { List, Map } from 'immutable';
+import { List, Map, Set } from 'immutable';
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -70,7 +70,7 @@ function Square({ x, y }: SquareProps): JSX.Element {
     const move = getMove(item.toPlace, item.posNum, toPosNum);
 
     const correctTurn = itemType === playersTurn.type;
-    const squareFree = !tigers.concat(goats).includes(toPosNum);
+    const squareFree = !tigers.union(goats).includes(toPosNum);
     return correctTurn && squareFree && possibleMoves.includes(move);
   };
 
@@ -87,27 +87,18 @@ function Square({ x, y }: SquareProps): JSX.Element {
     const newNumGoatsToPlace = item.toPlace ? numGoatsToPlace - 1 : numGoatsToPlace;
 
     const applyPlace = () => {
-      return List.of(tigers, goats.push(toPosNum));
+      return List.of(tigers, goats.add(toPosNum));
     };
     const applyStep = () => {
       if (itemType === ItemTypes.TIGER) {
-        return List.of(
-          tigers.filterNot((val) => val === fromPosNum).push(toPosNum),
-          goats,
-        );
+        return List.of(tigers.remove(fromPosNum).add(toPosNum), goats);
       } else {
-        return List.of(
-          tigers,
-          goats.filterNot((val) => val === fromPosNum).push(toPosNum),
-        );
+        return List.of(tigers, goats.remove(fromPosNum).add(toPosNum));
       }
     };
     const applyJump = () => {
       const eaten = move.get(1, -1);
-      return List.of(
-        tigers.filterNot((val) => val === fromPosNum).push(toPosNum),
-        goats.filterNot((val) => val === eaten),
-      );
+      return List.of(tigers.remove(fromPosNum).add(toPosNum), goats.remove(eaten));
     };
 
     const applyMoveMap = Map(List.of([1, applyPlace], [2, applyStep], [3, applyJump]));
@@ -119,7 +110,7 @@ function Square({ x, y }: SquareProps): JSX.Element {
       playerNum: newPlayerNum,
       numGoatsToPlace: newNumGoatsToPlace,
       history: newHistory,
-      possibleMoves: List(),
+      possibleMoves: Set(),
       result: '',
     });
 

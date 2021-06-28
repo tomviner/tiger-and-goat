@@ -31,7 +31,7 @@ server
 
 browser
 
-- pending move (fix eaten bug), send, animate
+- animate
 - split square
 - fix drop target offset
 - folders: components, services, etc

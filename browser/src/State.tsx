@@ -1,4 +1,4 @@
-import { List } from 'immutable';
+import { List, Set } from 'immutable';
 import { atom, DefaultValue, selector } from 'recoil';
 import { ItemTypes, NUM_GOATS } from './Constants';
 
@@ -14,7 +14,7 @@ export const numGoatsToPlaceState = atom({
 
 export const possibleMovesState = atom({
   key: 'possibleMovesState',
-  default: List() as List<List<number>>,
+  default: Set() as Set<List<number>>,
 });
 
 export const resultState = atom({
@@ -24,15 +24,15 @@ export const resultState = atom({
 
 export const historyState = atom({
   key: 'historyState',
-  default: List() as List<List<List<number>>>,
+  default: List() as List<List<Set<number>>>,
 });
 
 export const tigersState = selector({
   key: 'tigersState',
   get: ({ get }) => {
     const history = get(historyState);
-    const lastPieces = history.last(List()) as List<List<number>>;
-    return lastPieces.get(0, List());
+    const lastPieces = history.last(List()) as List<Set<number>>;
+    return lastPieces.get(0, Set());
   },
 });
 
@@ -40,8 +40,8 @@ export const goatsState = selector({
   key: 'goatsState',
   get: ({ get }) => {
     const history = get(historyState);
-    const lastPieces = history.last(List()) as List<List<number>>;
-    return lastPieces.get(1, List());
+    const lastPieces = history.last(List()) as List<Set<number>>;
+    return lastPieces.get(1, Set());
   },
 });
 
@@ -68,7 +68,7 @@ export const playersTurnState = selector({
 export type StateOfGameType = {
   playerNum: number;
   numGoatsToPlace: number;
-  history: List<List<List<number>>>;
+  history: List<List<Set<number>>>;
 };
 
 export const stateOfGameState = selector<StateOfGameType>({
@@ -90,7 +90,7 @@ export const stateOfGameState = selector<StateOfGameType>({
 });
 
 export interface UpdatedGameType extends StateOfGameType {
-  possibleMoves: List<List<number>>;
+  possibleMoves: Set<List<number>>;
   result: string;
 }
 
