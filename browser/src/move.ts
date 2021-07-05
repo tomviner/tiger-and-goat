@@ -24,42 +24,33 @@ export const getMove = (
   return List();
 };
 
-enum MoveType {
-  PLACE = 1,
-  STEP,
-  JUMP,
-}
-
 export class Move {
-  toPlace: boolean | unknown;
-  fromPosNum: number;
-  eaten = -1;
+  toPlace: boolean;
+  fromPosNum: number | null;
+  eaten: number | null = null;
   toPosNum: number;
-  moveType: MoveType = MoveType.PLACE;
 
   constructor(toPlace: boolean, fromPosNum: number, toPosNum: number) {
+    this.toPlace = toPlace;
     this.fromPosNum = fromPosNum;
     this.toPosNum = toPosNum;
 
-    if (toPlace) {
-      this.moveType = MoveType.PLACE;
-    } else {
-      const canStepTo = STEPS_GRAPH.get(this.fromPosNum);
-      if (canStepTo && canStepTo.includes(this.toPosNum)) {
-        this.moveType = MoveType.STEP;
-      }
+    if (!toPlace) {
       const canJumpTo = JUMPS_GRAPH.get(this.fromPosNum);
       if (canJumpTo && canJumpTo.includes(this.toPosNum)) {
-        this.moveType = MoveType.JUMP;
         this.eaten = average(this.fromPosNum, this.toPosNum);
+      }
+      const canStepTo = STEPS_GRAPH.get(this.fromPosNum);
+      if (!(canStepTo && canStepTo.includes(this.toPosNum))) {
+        throw new Error('Move not allowed');
       }
     }
   }
 
   toList(): List<number> {
-    if (this.moveType === MoveType.PLACE) {
+    if (this.fromPosNum === null) {
       return List([this.toPosNum]);
-    } else if (this.moveType === MoveType.STEP) {
+    } else if (this.eaten === null) {
       return List([this.fromPosNum, this.toPosNum]);
     } else {
       return List([this.fromPosNum, this.eaten, this.toPosNum]);
@@ -71,9 +62,9 @@ export class Move {
     goats: Set<number>,
     itemType: string | symbol | null,
   ): List<Set<number>> {
-    if (this.moveType === MoveType.PLACE) {
+    if (this.fromPosNum === null) {
       return List.of(tigers, goats.add(this.toPosNum));
-    } else if (this.moveType === MoveType.STEP) {
+    } else if (this.eaten === null) {
       if (itemType === ItemTypes.TIGER) {
         return List.of(tigers.remove(this.fromPosNum).add(this.toPosNum), goats);
       } else {

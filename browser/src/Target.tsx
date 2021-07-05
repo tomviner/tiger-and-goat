@@ -26,7 +26,7 @@ export interface TargetProps {
 
 export interface ItemType {
   toPlace: boolean;
-  posNum: number;
+  fromPosNum: number;
 }
 
 function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
@@ -45,7 +45,7 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
     item: ItemType,
     toPosNum: number,
   ) => {
-    const move = new Move(item.toPlace, item.posNum, toPosNum);
+    const move = new Move(item.toPlace, item.fromPosNum, toPosNum);
     const correctTurn = itemType === playersTurn.type;
     const targetFree = !tigers.union(goats).includes(toPosNum);
     return correctTurn && targetFree && possibleMoves.includes(move.toList());
@@ -56,7 +56,7 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
     item: ItemType,
     toPosNum: number,
   ) => void = (itemType, item, toPosNum) => {
-    const fromPosNum = item.posNum;
+    const fromPosNum = item.fromPosNum;
     const move = new Move(item.toPlace, fromPosNum, toPosNum);
 
     const newPlayerNum = playersTurn.otherPlayerNum;
