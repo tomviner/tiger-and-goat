@@ -27,6 +27,11 @@ export const historyState = atom({
   default: List() as List<List<Set<number>>>,
 });
 
+export const remoteMoveState = atom<List<number> | null>({
+  key: 'remoteMoveState',
+  default: null,
+});
+
 export const tigersState = selector({
   key: 'tigersState',
   get: ({ get }) => {
@@ -59,9 +64,11 @@ export const playersTurnState = selector({
   key: 'playersTurnState',
   get: ({ get }) => {
     const playerNum = get(playerNumState);
-    const name = playerNum === 2 ? 'Tiger' : 'Goat';
-    const type = playerNum === 2 ? ItemTypes.TIGER : ItemTypes.GOAT;
-    return { name, type, isTiger: playerNum === 2, isGoat: playerNum === 1 };
+    const isTiger = playerNum === 2;
+    const name = isTiger ? 'Tiger' : 'Goat';
+    const type = isTiger ? ItemTypes.TIGER : ItemTypes.GOAT;
+    const otherPlayerNum = isTiger ? 1 : 2;
+    return { name, type, playerNum, otherPlayerNum };
   },
 });
 
@@ -92,6 +99,7 @@ export const stateOfGameState = selector<StateOfGameType>({
 export interface UpdatedGameType extends StateOfGameType {
   possibleMoves: Set<List<number>>;
   result: string;
+  remoteMove: List<number> | null;
 }
 
 export const updatedGameState = selector<UpdatedGameType>({
@@ -100,14 +108,16 @@ export const updatedGameState = selector<UpdatedGameType>({
     const stateOfGame = get(stateOfGameState);
     const possibleMoves = get(possibleMovesState);
     const result = get(resultState);
-    return { ...stateOfGame, possibleMoves, result };
+    const remoteMove = get(remoteMoveState);
+    return { ...stateOfGame, possibleMoves, result, remoteMove };
   },
   set: ({ set }, updatedGame) => {
     if (!(updatedGame instanceof DefaultValue)) {
-      const { possibleMoves, result } = updatedGame;
+      const { possibleMoves, result, remoteMove } = updatedGame;
       set(stateOfGameState, updatedGame);
       set(possibleMovesState, possibleMoves);
       set(resultState, result);
+      set(remoteMoveState, remoteMove);
     }
   },
 });

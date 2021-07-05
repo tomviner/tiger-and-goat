@@ -21,3 +21,8 @@
     opacity: 0.5;
     cursor: move;
 }
+
+/*.piece.isUnder {
+    background: red;
+    opacity: 0.25;
+}*/

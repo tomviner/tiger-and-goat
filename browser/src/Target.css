@@ -1,0 +1,22 @@
+.target {
+    right: 50px;
+    bottom: 50px;
+    position: absolute;
+    width: 100px;
+    height: 100px;
+}
+
+.target.isOver {
+    background: yellow;
+    opacity: 0.25;
+}
+
+.target.cannotDrop {
+    background: red;
+    opacity: 0.25;
+}
+
+/*.target:not(div.piece.isNotUnder ~ .target){
+    background: red;
+    opacity: 0.5;
+}*/

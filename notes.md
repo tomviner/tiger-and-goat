@@ -32,8 +32,7 @@ server
 browser
 
 - animate
-- split square
-- fix drop target offset
+- split target
 - folders: components, services, etc
 - human v human
 - ai v ai mode

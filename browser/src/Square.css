@@ -2,14 +2,6 @@
     position: relative;
 }
 
-.square.isOver {
-    background: yellow;
-}
-
-.square.cannotDrop {
-    background: red;
-}
-
 .visibleSquare {
     border: 2px solid black;
 }

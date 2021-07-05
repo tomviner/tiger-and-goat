@@ -15,6 +15,7 @@ const checkResponse = (value: ApiResponse<UpdatedGameType>) => {
     // history: List<List<Set<number>>>;
     // possibleMoves: Set<List<number>>;
     // result: string;
+    // remoteMove: string;
     path === ['possibleMoves'] || (path[0] === 'history' && path.length === 3);
 
   const reviver = (

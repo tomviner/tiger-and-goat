@@ -52,11 +52,15 @@ def move(stateOfGame, move=None):
     if have_client_move:
         game.play_move(move)
 
+    ai_move = None
     if not game.is_over():
         ai_move = game.get_move()
         game.play_move(ai_move)
 
-    return game.as_dict()
+    return {
+        'remoteMove': ai_move,
+        **game.as_dict()
+    }
 
 
 if __name__ == '__main__':
