@@ -17,12 +17,12 @@
     cursor: move;
 }
 
+.piece.toPlace {
+    transform: translate(20%, 20%);
+    transition: all 1s ease-in-out;
+}
+
 .piece.isDragging {
     opacity: 0.5;
     cursor: move;
 }
-
-/*.piece.isUnder {
-    background: red;
-    opacity: 0.25;
-}*/

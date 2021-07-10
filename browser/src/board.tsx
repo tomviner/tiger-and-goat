@@ -26,11 +26,11 @@ function Board(): JSX.Element {
     res.then(setUpdatedGame).catch(console.error);
   }, []);
 
-  useEffect(() => {
-    if (stateOfGame.history.size) {
-      setTimeout(() => swap(), 100);
-    }
-  }, [stateOfGame]);
+  // useEffect(() => {
+  //   if (stateOfGame.history.size) {
+  //     setTimeout(() => swap(), 100);
+  //   }
+  // }, [stateOfGame]);
 
   const swap = () => {
     const res = postData(stateOfGame, null);

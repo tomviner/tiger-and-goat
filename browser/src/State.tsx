@@ -29,7 +29,7 @@ export const historyState = atom({
 
 export const remoteMoveState = atom<List<number> | null>({
   key: 'remoteMoveState',
-  default: null,
+  default: null as List<number> | null,
 });
 
 export const tigersState = selector({

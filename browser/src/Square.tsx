@@ -34,21 +34,25 @@ function Square({ x, y }: SquareProps): JSX.Element {
 
   const piece = tigers.includes(posNum) ? (
     <Piece
+      key={`Ti${posNum}`}
       type={ItemTypes.TIGER}
       posNum={posNum}
+      pieceUnderDrag={pieceUnderDrag}
       setPieceUnderDrag={setPieceUnderDrag}
     />
   ) : goats.includes(posNum) ? (
     <Piece
+      key={`Go${posNum}` + 25}
       type={ItemTypes.GOAT}
       posNum={posNum}
+      pieceUnderDrag={pieceUnderDrag}
       setPieceUnderDrag={setPieceUnderDrag}
     />
   ) : null;
 
   return (
     <div className={squareClsNames} key={posNum}>
-      <Target key={posNum} posNum={posNum} pieceUnderDrag={pieceUnderDrag} />
+      <Target key={`Ta${posNum}`} posNum={posNum} pieceUnderDrag={pieceUnderDrag} />
       {piece}
       {posNum}
     </div>

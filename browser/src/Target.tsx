@@ -72,7 +72,7 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
       history: newHistory,
       possibleMoves: Set(),
       result: '',
-      remoteMove: null,
+      remoteMove: previousRemoteMove,
     });
 
     console.log('POST', JSON.stringify({ move: move.toList(), stateOfGame }));
@@ -83,9 +83,8 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
       console.error(error);
       // error with fetching and applying remote move, revert local move
       setUpdatedGame(updatedGame);
-      // move = previousRemoteMove;
     });
-    return { move: move.toList() };
+    // return { move: move.toList() };
   };
 
   const [{ isOver, canDrop }, drop] = useDrop(
@@ -99,7 +98,7 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
         canDrop: !!monitor.canDrop(),
       }),
     }),
-    [posNum, playersTurn, possibleMoves, history],
+    [posNum, playersTurn, history],
   );
 
   const targetClsNames = getClsNames(
@@ -110,7 +109,7 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
     'target',
   );
 
-  return <div className={targetClsNames} key={posNum} ref={drop} />;
+  return <div className={targetClsNames} key={`TD${posNum}`} ref={drop} />;
 }
 
 export default Target;
