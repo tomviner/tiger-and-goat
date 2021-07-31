@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { ItemTypes } from './Constants';
 import Piece from './Piece';
@@ -13,11 +13,12 @@ export interface SquareProps {
 }
 
 function Square({ x, y }: SquareProps): JSX.Element {
+  const posNum = 5 * y + x;
+  // console.log('render Square', posNum);
   const [pieceUnderDrag, setPieceUnderDrag] = useState(false);
   const tigers = useRecoilValue(tigersState);
   const goats = useRecoilValue(goatsState);
 
-  const posNum = 5 * y + x;
   // right column and bottom row are not visible
   const visible = x < 4 && y < 4;
   // backward & forward refer to the direction of slash characters
@@ -32,23 +33,27 @@ function Square({ x, y }: SquareProps): JSX.Element {
     'square',
   );
 
-  const piece = tigers.includes(posNum) ? (
-    <Piece
-      key={`Ti${posNum}`}
-      type={ItemTypes.TIGER}
-      posNum={posNum}
-      pieceUnderDrag={pieceUnderDrag}
-      setPieceUnderDrag={setPieceUnderDrag}
-    />
-  ) : goats.includes(posNum) ? (
-    <Piece
-      key={`Go${posNum}` + 25}
-      type={ItemTypes.GOAT}
-      posNum={posNum}
-      pieceUnderDrag={pieceUnderDrag}
-      setPieceUnderDrag={setPieceUnderDrag}
-    />
-  ) : null;
+  const getPiece = (isTiger: boolean, isGoat: boolean) => {
+    // console.log('build piece', posNum, isTiger, isGoat);
+    const type = isTiger ? ItemTypes.TIGER : isGoat ? ItemTypes.GOAT : null;
+    if (type !== null) {
+      return (
+        <Piece
+          key={`P${posNum}`}
+          type={type}
+          posNum={posNum}
+          setPieceUnderDrag={setPieceUnderDrag}
+        />
+      );
+    } else {
+      return null;
+    }
+  };
+
+  const piece = useMemo(
+    () => getPiece(tigers.includes(posNum), goats.includes(posNum)),
+    [tigers.includes(posNum), goats.includes(posNum), posNum],
+  );
 
   return (
     <div className={squareClsNames} key={posNum}>

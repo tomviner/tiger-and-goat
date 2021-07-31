@@ -1,5 +1,6 @@
 import React from 'react';
 import { useRecoilValue } from 'recoil';
+import GoatLastEaten from './GoatLastEaten';
 import { numGoatsEatenState } from './State';
 
 function GoatsEaten(): JSX.Element {
@@ -10,9 +11,17 @@ function GoatsEaten(): JSX.Element {
     numGoatsEaten = 0;
   }
 
+  const nonLastNumGoatsEaten = Math.max(0, numGoatsEaten - 1);
+
   return (
     <>
-      <div>Eaten: {'🐐'.repeat(numGoatsEaten)}</div>
+      <div>Eaten:</div>
+      <div className="goatsEatenWrapper">
+        <div className="nonLastGoatsEaten">{'🐐'.repeat(nonLastNumGoatsEaten)}</div>
+        {numGoatsEaten ? (
+          <GoatLastEaten numGoatsEaten={numGoatsEaten} key={numGoatsEaten} />
+        ) : null}
+      </div>
     </>
   );
 }

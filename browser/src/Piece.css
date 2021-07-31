@@ -15,12 +15,41 @@
     bottom: 75px;
     position: absolute;
     cursor: move;
+    /*font-size: 50px;*/
+    transition: all 1s;
+    z-index: 5;
+
 }
 
-.piece.toPlace {
-    transform: translate(20%, 20%);
-    transition: all 1s ease-in-out;
+/*.justMoved {
+    transition: all 2s ease-in-out;
+}*/
+
+/*.piece.toPlace {
+    transform: translate(-20px, -20px);
+    right: 65px;
+    bottom: 75px;
+    font-size: 50px;
+}*/
+
+/*.piece.setOldRemoteMoveIsPlace {*/
+    /*transform: translate(-20px, -20px);*/
+    /*right: 85px;
+    bottom: 375px;*/
+
+    /*position: relative;*/
+
+    /*font-size: 16px;*/
+    /*transform: scale(.32)*/
+    /*transition: none 15s ease-in-out;*/
+/*}*/
+
+/*.toPlace:after {
+    font-size: 50px;
 }
+.toSetToPlace:after {
+    font-size: 16px;
+}*/
 
 .piece.isDragging {
     opacity: 0.5;

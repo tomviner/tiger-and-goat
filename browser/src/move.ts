@@ -6,8 +6,8 @@ import { average } from './utils';
 export class Move {
   toPlace: boolean;
   fromPosNum: number | null;
-  eaten: number | null = null;
-  toPosNum: number | null;
+  eaten: number | null;
+  toPosNum: number;
 
   toJS(): Record<string, unknown> {
     return {
@@ -20,7 +20,7 @@ export class Move {
 
   static fromList(list: List<number | null>): Move {
     let [fromPos, eaten, toPos] = list.toJS();
-    // console.log('fromList', list.toJS(), fromPos, eaten, toPos);
+
     // 1 el --> place
     const toPlace = eaten === undefined;
     if (toPlace) {
@@ -34,7 +34,6 @@ export class Move {
     }
     // 3 els --> jump
     // fromPos = fromPos;
-    // console.log('new Move', toPlace, fromPos, toPos, eaten);
     return new Move(toPlace, fromPos, toPos);
   }
 
@@ -42,30 +41,27 @@ export class Move {
     this.toPlace = toPlace;
     this.fromPosNum = fromPosNum;
     this.toPosNum = toPosNum;
+    this.eaten = null;
 
     if (!toPlace) {
       const canStepTo = STEPS_GRAPH.get(this.fromPosNum);
       const canJumpTo = JUMPS_GRAPH.get(this.fromPosNum);
-      if (canJumpTo && canJumpTo.includes(this.toPosNum)) {
+      if (canJumpTo?.includes(this.toPosNum)) {
         this.eaten = average(this.fromPosNum, this.toPosNum);
       } else if (!canStepTo || !canStepTo.includes(this.toPosNum)) {
-        this.toPosNum = null;
+        throw 'InvalidMove';
       }
     }
     // console.log('mid', this.toJS());
   }
 
   toList(): List<number> {
-    if (this.toPosNum !== null) {
-      if (this.fromPosNum === null) {
-        return List([this.toPosNum]);
-      } else if (this.eaten === null) {
-        return List([this.fromPosNum, this.toPosNum]);
-      } else {
-        return List([this.fromPosNum, this.eaten, this.toPosNum]);
-      }
+    if (this.fromPosNum === null) {
+      return List([this.toPosNum]);
+    } else if (this.eaten === null) {
+      return List([this.fromPosNum, this.toPosNum]);
     } else {
-      return List();
+      return List([this.fromPosNum, this.eaten, this.toPosNum]);
     }
   }
 
@@ -74,23 +70,19 @@ export class Move {
     goats: Set<number>,
     itemType: string | symbol | null,
   ): List<Set<number>> {
-    if (this.toPosNum !== null) {
-      if (this.fromPosNum === null) {
-        return List.of(tigers, goats.add(this.toPosNum));
-      } else if (this.eaten === null) {
-        if (itemType === ItemTypes.TIGER) {
-          return List.of(tigers.remove(this.fromPosNum).add(this.toPosNum), goats);
-        } else {
-          return List.of(tigers, goats.remove(this.fromPosNum).add(this.toPosNum));
-        }
+    if (this.fromPosNum === null) {
+      return List.of(tigers, goats.add(this.toPosNum));
+    } else if (this.eaten === null) {
+      if (itemType === ItemTypes.TIGER) {
+        return List.of(tigers.remove(this.fromPosNum).add(this.toPosNum), goats);
       } else {
-        return List.of(
-          tigers.remove(this.fromPosNum).add(this.toPosNum),
-          goats.remove(this.eaten),
-        );
+        return List.of(tigers, goats.remove(this.fromPosNum).add(this.toPosNum));
       }
     } else {
-      return List();
+      return List.of(
+        tigers.remove(this.fromPosNum).add(this.toPosNum),
+        goats.remove(this.eaten),
+      );
     }
   }
 }

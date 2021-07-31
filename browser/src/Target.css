@@ -16,6 +16,11 @@
     opacity: 0.25;
 }
 
+.target.isUnderSelf {
+    background: none;
+    opacity: 1;
+}
+
 /*.target:not(div.piece.isNotUnder ~ .target){
     background: red;
     opacity: 0.5;

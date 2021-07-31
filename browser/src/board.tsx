@@ -16,6 +16,7 @@ import {
 import { range2d } from './utils';
 
 function Board(): JSX.Element {
+  // console.log('render Board');
   const setUpdatedGame = useSetRecoilState(updatedGameState);
   const stateOfGame = useRecoilValue(stateOfGameState);
   const playersTurn = useRecoilValue(playersTurnState);
