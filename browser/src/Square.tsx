@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { ItemTypes } from './Constants';
 import Piece from './Piece';
@@ -50,15 +50,10 @@ function Square({ x, y }: SquareProps): JSX.Element {
     }
   };
 
-  const piece = useMemo(
-    () => getPiece(tigers.includes(posNum), goats.includes(posNum)),
-    [tigers.includes(posNum), goats.includes(posNum), posNum],
-  );
-
   return (
     <div className={squareClsNames} key={posNum}>
       <Target key={`Ta${posNum}`} posNum={posNum} pieceUnderDrag={pieceUnderDrag} />
-      {piece}
+      {getPiece(tigers.includes(posNum), goats.includes(posNum))}
       {posNum}
     </div>
   );
