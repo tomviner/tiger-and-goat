@@ -1,8 +1,10 @@
+# from colr import color
+
 write_methods = '''
 - switch_player
 - make_move
 - unmake_move
-- nplayer
+- current_player
 '''
 
 read_methods = '''
@@ -10,7 +12,6 @@ read_methods = '''
 - is_over
 - scoring
 '''
-
 
 def log(f):
     def _f(*a, **kw):

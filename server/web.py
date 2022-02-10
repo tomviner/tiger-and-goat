@@ -16,7 +16,7 @@ def get_game(state_of_game={}, have_client_move=True):
     tiger_plays = player_num == 2
     ai_is_goat = tiger_plays == have_client_move
 
-    ai_player = Negamax(6)
+    ai_player = Negamax(6 if ai_is_goat else 6)
     if ai_is_goat:
         game = TigerAndGoat([AI_Player(ai_player, 'goat'), Human_Player('tiger')])
     else:
@@ -55,6 +55,7 @@ def move(stateOfGame, move=None):
     ai_move = None
     if not game.is_over():
         ai_move = game.get_move()
+        # print('xxx alpha', game.players[1].AI_algo.alpha, ai_move)
         game.play_move(ai_move)
 
     return {

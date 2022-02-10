@@ -5,6 +5,7 @@ import './GoatToPlace.css';
 import { getClsNames } from './utils';
 
 function GoatToPlace(): JSX.Element {
+  // console.log('render GoatToPlace');
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.GOAT,
     item: { toPlace: true, fromPosNum: null },

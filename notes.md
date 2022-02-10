@@ -23,17 +23,18 @@ canonicalise
 
 server
 
-- return ai_move
-- return illegal move
-- fix tiger eat 5th goat bug
+- use latest easyAI dep
+- tidy code
+- return illegal move?
+- convert to fastAPI
 
 ---
 
 browser
 
-- animate
-- split target
+- finish animations
 - folders: components, services, etc
 - human v human
-- ai v ai mode
+- ai v ai button
 - touch event mode
+- tidy code

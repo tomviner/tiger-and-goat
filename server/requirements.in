@@ -1,0 +1,15 @@
+easyAI
+funcy
+jupyter
+matplotlib
+networkx
+pygraphviz
+scipy
+hug
+marshmallow
+
+pytest
+isort
+black
+flake8
+autoflake

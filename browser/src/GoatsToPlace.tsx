@@ -5,6 +5,7 @@ import GoatToPlace from './GoatToPlace';
 import { numGoatsToPlaceState } from './State';
 
 function GoatsToPlace(): JSX.Element {
+  // console.log('render GoatsToPlace');
   const numGoatsToPlace = useRecoilValue(numGoatsToPlaceState);
 
   const GoatsToPlace = (
