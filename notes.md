@@ -23,7 +23,6 @@ canonicalise
 
 server
 
-- use latest easyAI dep
 - tidy code
 - return illegal move?
 - convert to fastAPI

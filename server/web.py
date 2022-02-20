@@ -58,10 +58,7 @@ def move(stateOfGame, move=None):
         # print('xxx alpha', game.players[1].AI_algo.alpha, ai_move)
         game.play_move(ai_move)
 
-    return {
-        'remoteMove': ai_move,
-        **game.as_dict()
-    }
+    return {'remoteMove': ai_move, **game.as_dict()}
 
 
 if __name__ == '__main__':

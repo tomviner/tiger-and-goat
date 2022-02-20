@@ -1,5 +1,5 @@
-import time
 import random
+import time
 from collections import deque
 
 from easyAI import AI_Player, Negamax, TwoPlayerGame
