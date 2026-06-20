@@ -13,3 +13,9 @@
     text-transform: uppercase;
     font-size: xx-large;
 }
+
+.controls{
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
