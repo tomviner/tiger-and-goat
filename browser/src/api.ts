@@ -16,7 +16,8 @@ const checkResponse = (value: ApiResponse<UpdatedGameType>) => {
     // possibleMoves: Set<List<number>>;
     // result: string;
     // remoteMove: string;
-    path === ['possibleMoves'] || (path[0] === 'history' && path.length === 3);
+    (path[0] === 'possibleMoves' && path.length === 1) ||
+    (path[0] === 'history' && path.length === 3);
 
   const reviver = (
     key: string | number,
@@ -31,7 +32,7 @@ const checkResponse = (value: ApiResponse<UpdatedGameType>) => {
   };
   if (ok) {
     // we want an object (not a Map) containing immutable types
-    return fromJS(data, reviver).toObject() as UpdatedGameType;
+    return fromJS(data, reviver).toObject() as unknown as UpdatedGameType;
   }
   throw Error(`${status} ${problem}`);
 };

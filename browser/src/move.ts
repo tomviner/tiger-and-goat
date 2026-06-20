@@ -33,23 +33,28 @@ export class Move {
       eaten = null;
     }
     // 3 els --> jump
-    // fromPos = fromPos;
+    if (typeof toPos !== 'number') {
+      throw new Error('A move must have a destination position');
+    }
     return new Move(toPlace, fromPos, toPos);
   }
 
-  constructor(toPlace: boolean, fromPosNum: number, toPosNum: number) {
+  constructor(toPlace: boolean, fromPosNum: number | null, toPosNum: number) {
     this.toPlace = toPlace;
     this.fromPosNum = fromPosNum;
     this.toPosNum = toPosNum;
     this.eaten = null;
 
     if (!toPlace) {
+      if (this.fromPosNum === null) {
+        throw new Error('A moving piece must have a source position');
+      }
       const canStepTo = STEPS_GRAPH.get(this.fromPosNum);
       const canJumpTo = JUMPS_GRAPH.get(this.fromPosNum);
       if (canJumpTo?.includes(this.toPosNum)) {
         this.eaten = average(this.fromPosNum, this.toPosNum);
       } else if (!canStepTo || !canStepTo.includes(this.toPosNum)) {
-        throw 'InvalidMove';
+        throw new Error('Invalid move');
       }
     }
     // console.log('mid', this.toJS());

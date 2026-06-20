@@ -1,11 +1,28 @@
-tidy-imports:
-	@autoflake --in-place --remove-all-unused-imports --ignore-init-module-imports --recursive server
+.PHONY: build browser format install lint server test
 
-black:
-	@black server
+install:
+	uv sync
+	npm --prefix browser ci
 
-isort:
-	@isort server
+server:
+	uv run uvicorn server.web:app --reload --port 8000
 
-format: black isort
-	
+browser:
+	npm --prefix browser run dev
+
+test:
+	uv run pytest
+	npm --prefix browser test
+
+lint:
+	uv run ruff check .
+	uv run ruff format --check .
+	npm --prefix browser run format:check
+
+format:
+	uv run ruff check --fix .
+	uv run ruff format .
+	npm --prefix browser run format
+
+build:
+	npm --prefix browser run build
