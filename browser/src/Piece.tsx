@@ -111,9 +111,7 @@ function Piece({ type, posNum, setPieceUnderDrag }: PieceProps): JSX.Element {
 
   const getStyle = () => {
     if (setOldRemoteMove) {
-      console.log('type', type, 'remoteMoveObj', remoteMoveObj?.toJS());
       if (remoteMoveObj?.toPlace) {
-        console.log(type, 'place');
         return {
           right: `${65 + 100 * (x - 2)}px`,
           bottom: `${75 + 100 * (y + 0.5)}px`,
@@ -121,18 +119,13 @@ function Piece({ type, posNum, setPieceUnderDrag }: PieceProps): JSX.Element {
         };
       } else if (remoteMoveObj?.fromPosNum !== null) {
         const [oldY, oldX] = divmod(remoteMoveObj?.fromPosNum as number, 5);
-        console.log(type, 'move or step');
-        if (type == ItemTypes.GOAT) {
-          return {
-            right: `${100 * (x - oldX)}px`,
-            bottom: `${100 * (y - oldY)}px`,
-          };
-        } else {
-          return {
-            right: `${65 + 100 * (x - oldX)}px`,
-            bottom: `${75 + 100 * (y - oldY)}px`,
-          };
-        }
+        // Start the FLIP animation from the source square. Tigers and goats
+        // share the same resting offset (right: 65px, bottom: 75px), so both
+        // keep that base when offsetting back to the source.
+        return {
+          right: `${65 + 100 * (x - oldX)}px`,
+          bottom: `${75 + 100 * (y - oldY)}px`,
+        };
       }
     }
     return {};
