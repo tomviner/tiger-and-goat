@@ -5,6 +5,7 @@ import App from './App';
 
 vi.mock('./api', () => ({
   getData: vi.fn(() => new Promise(() => undefined)),
+  getOpponents: vi.fn(() => new Promise(() => undefined)),
   postData: vi.fn(),
 }));
 

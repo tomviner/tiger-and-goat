@@ -6,6 +6,36 @@ const api = create({
   baseURL: 'http://localhost:8000',
 });
 
+export type Controller =
+  | { type: 'human' }
+  | { type: 'ai'; depth: number }
+  | { type: 'strategy'; name: string };
+
+export interface Controllers {
+  goat: Controller;
+  tiger: Controller;
+}
+
+export interface StrategyInfo {
+  name: string;
+  side: number;
+  sideName: string;
+  description: string;
+}
+
+export interface OpponentsInfo {
+  strategies: StrategyInfo[];
+  depth: { min: number; max: number; default: number };
+}
+
+export const getOpponents = (): Promise<OpponentsInfo> =>
+  api.get<OpponentsInfo>('/opponents').then((value) => {
+    if (value.ok && value.data) {
+      return value.data;
+    }
+    throw Error(`${value.status} ${value.problem}`);
+  });
+
 const checkResponse = (value: ApiResponse<UpdatedGameType>) => {
   const { ok, data, problem, status } = value;
 
@@ -43,6 +73,9 @@ export const getData = (): Promise<UpdatedGameType> => {
 export const postData = (
   stateOfGame: StateOfGameType,
   move: List<number> | null,
+  controllers: Controllers,
 ): Promise<UpdatedGameType> => {
-  return api.post<UpdatedGameType>('/move', { move, stateOfGame }).then(checkResponse);
+  return api
+    .post<UpdatedGameType>('/move', { move, stateOfGame, controllers })
+    .then(checkResponse);
 };

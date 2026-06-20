@@ -14,7 +14,15 @@
 }
 
 .controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 6px 0;
+}
+
+.sidePicker {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 4px;
 }

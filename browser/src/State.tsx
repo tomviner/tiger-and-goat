@@ -1,10 +1,19 @@
 import { List, Set } from 'immutable';
 import { atom, DefaultValue, selector } from 'recoil';
+import { Controllers } from './api';
 import { ItemTypes, NUM_GOATS } from './Constants';
 
 export const playerNumState = atom({
   key: 'playerNumState',
   default: 1,
+});
+
+// Who controls each side. Defaults to the classic setup: you play the goats,
+// the search AI plays the tigers. Either side can be set to Human, AI, or a
+// named strategy via the dropdowns.
+export const controllersState = atom<Controllers>({
+  key: 'controllersState',
+  default: { goat: { type: 'human' }, tiger: { type: 'ai', depth: 6 } },
 });
 
 export const numGoatsToPlaceState = atom({
