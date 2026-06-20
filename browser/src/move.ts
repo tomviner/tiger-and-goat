@@ -57,7 +57,6 @@ export class Move {
         throw new Error('Invalid move');
       }
     }
-    // console.log('mid', this.toJS());
   }
 
   toList(): List<number> {

@@ -27,8 +27,8 @@ const checkResponse = (value: ApiResponse<UpdatedGameType>) => {
     return isKeyed(sequence)
       ? sequence.toMap()
       : path && isSetPath(path)
-      ? sequence.toSet()
-      : sequence.toList();
+        ? sequence.toSet()
+        : sequence.toList();
   };
   if (ok) {
     // we want an object (not a Map) containing immutable types

@@ -10,7 +10,6 @@ export interface GoatLastEatenProps {
 }
 
 function GoatLastEaten({ numGoatsEaten }: GoatLastEatenProps): JSX.Element {
-  // console.log('render GoatLastEaten');
   if (numGoatsEaten < 0) {
     console.warn('numGoatsEaten is', numGoatsEaten);
     numGoatsEaten = 0;
@@ -18,7 +17,6 @@ function GoatLastEaten({ numGoatsEaten }: GoatLastEatenProps): JSX.Element {
 
   const [remoteMoveApplied, setRemoteMoveApplied] = useState(false);
 
-  // let numGoatLastEaten = useRecoilValue(numGoatLastEatenState);
   const remoteMove = useRecoilValue(remoteMoveState);
 
   const remoteMoveObj = remoteMove ? Move.fromList(remoteMove) : null;

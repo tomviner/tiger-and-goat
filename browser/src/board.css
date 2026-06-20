@@ -1,21 +1,20 @@
-.gameBoard{
-    display: grid;
-    grid-template-columns: repeat(5, 100px);
-    grid-template-rows: repeat(5, 100px);
+.gameBoard {
+  display: grid;
+  grid-template-columns: repeat(5, 100px);
+  grid-template-rows: repeat(5, 100px);
 
-    justify-content: center;
-    padding-top: 50px;
+  justify-content: center;
+  padding-top: 50px;
 }
 
-
-.result{
-    color: red;
-    text-transform: uppercase;
-    font-size: xx-large;
+.result {
+  color: red;
+  text-transform: uppercase;
+  font-size: xx-large;
 }
 
-.controls{
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
+.controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
 }

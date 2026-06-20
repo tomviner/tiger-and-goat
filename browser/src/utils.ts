@@ -21,11 +21,13 @@ type nameBoolMapType = {
   [key: string]: boolean;
 };
 
-export const getClsNames: (namedBools: nameBoolMapType, staticNames: string) => string =
-  (namedBools, staticNames = '') => {
-    const conditionalNames = Object.keys(namedBools).filter((name) => namedBools[name]);
-    return `${staticNames} ${conditionalNames.join(' ')}`.trim();
-  };
+export const getClsNames: (
+  namedBools: nameBoolMapType,
+  staticNames: string,
+) => string = (namedBools, staticNames = '') => {
+  const conditionalNames = Object.keys(namedBools).filter((name) => namedBools[name]);
+  return `${staticNames} ${conditionalNames.join(' ')}`.trim();
+};
 
 export const mapToFunction: <T, F>(seq: List<T>, func: (x: T) => F) => Map<T, F> = (
   seq,

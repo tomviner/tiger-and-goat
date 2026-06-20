@@ -1,27 +1,28 @@
-.goatsEatenWrapper,.nonLastGoatsEaten {
-    margin: auto;
-    width:  90px;
-    height:  20px;
-    text-align: left;
+.goatsEatenWrapper,
+.nonLastGoatsEaten {
+  margin: auto;
+  width: 90px;
+  height: 20px;
+  text-align: left;
 }
 
 .goatLastEatenWrapper {
-    position: relative;
-    margin: auto;
-    width:  90px;
-    height:  20px;
+  position: relative;
+  margin: auto;
+  width: 90px;
+  height: 20px;
 }
 
 .goatLastEaten.applyMove {
-    font-size: 50px;
+  font-size: 50px;
 }
 
 .goatLastEaten {
-    transition: all 2s ease-in-out;
-    margin: auto;
-    position: absolute;
-    left: 0px;
-    right: 0px;
-    bottom: 21px;
-    font-size: 16px;
+  transition: all 2s ease-in-out;
+  margin: auto;
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  bottom: 21px;
+  font-size: 16px;
 }

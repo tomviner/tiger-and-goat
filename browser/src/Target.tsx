@@ -30,7 +30,6 @@ export interface ItemType {
 }
 
 function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
-  // console.log('render Target', posNum);
   const playersTurn = useRecoilValue(playersTurnState);
   const tigers = useRecoilValue(tigersState);
   const goats = useRecoilValue(goatsState);
@@ -67,7 +66,6 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
 
     // this doesn't work, as it gets overridden below
     if (move?.eaten) {
-      console.log('set eaten');
       setPreviousRemoteMove(move.toList());
     }
 
@@ -78,7 +76,6 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
 
     const newHistory = history.push(newPieces);
     // apply local move
-    // console.log('set local move');
     setUpdatedGame({
       playerNum: newPlayerNum,
       numGoatsToPlace: newNumGoatsToPlace,
@@ -88,22 +85,14 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
       remoteMove: previousRemoteMove,
     });
 
-    // console.log('POST', JSON.stringify({ move: move.toList(), stateOfGame }));
     // request remote response move
     const res = postData(stateOfGame, move.toList());
     // apply remote move
-    res
-      .then((x) => {
-        // console.log('remoteMove', x?.remoteMove?.toJS());
-        return x;
-      })
-      .then(setUpdatedGame)
-      .catch((error) => {
-        console.error(error);
-        // error with fetching and applying remote move, revert local move
-        setUpdatedGame(updatedGame);
-      });
-    // return { move: move.toList() };
+    res.then(setUpdatedGame).catch((error) => {
+      console.error(error);
+      // error with fetching and applying remote move, revert local move
+      setUpdatedGame(updatedGame);
+    });
   };
 
   const [{ isOver, canDrop, isUnderSelf }, drop] = useDrop(

@@ -14,7 +14,6 @@ export interface SquareProps {
 
 function Square({ x, y }: SquareProps): JSX.Element {
   const posNum = 5 * y + x;
-  // console.log('render Square', posNum);
   const [pieceUnderDrag, setPieceUnderDrag] = useState(false);
   const tigers = useRecoilValue(tigersState);
   const goats = useRecoilValue(goatsState);
@@ -34,7 +33,6 @@ function Square({ x, y }: SquareProps): JSX.Element {
   );
 
   const getPiece = (isTiger: boolean, isGoat: boolean) => {
-    // console.log('build piece', posNum, isTiger, isGoat);
     const type = isTiger ? ItemTypes.TIGER : isGoat ? ItemTypes.GOAT : null;
     if (type !== null) {
       return (
