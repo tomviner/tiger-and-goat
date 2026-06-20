@@ -60,6 +60,26 @@ function Board(): JSX.Element {
   const setController = (side: SideKey, controller: Controller) =>
     setControllers({ ...controllers, [side]: controller });
 
+  // Swap the two sides' controllers. A strategy is side-specific, so if one
+  // lands on the wrong side it falls back to the AI.
+  const swapSides = () => {
+    const onSide = (controller: Controller, side: SideKey): Controller => {
+      if (controller.type === 'strategy') {
+        const valid = (opponents?.strategies ?? []).some(
+          (s) => s.sideName === side && s.name === controller.name,
+        );
+        if (!valid) {
+          return { type: 'ai', depth: opponents?.depth.default ?? 6 };
+        }
+      }
+      return controller;
+    };
+    setControllers({
+      goat: onSide(controllers.tiger, 'goat'),
+      tiger: onSide(controllers.goat, 'tiger'),
+    });
+  };
+
   const renderSide = (side: SideKey, label: string) => {
     const controller = controllers[side];
     const strategies = (opponents?.strategies ?? []).filter((s) => s.sideName === side);
@@ -120,6 +140,9 @@ function Board(): JSX.Element {
         <div className="result">{result}</div>
         <div className="controls">
           {renderSide('goat', 'Goat')}
+          <button className="swapButton" onClick={swapSides} title="Swap sides">
+            ⇄
+          </button>
           {renderSide('tiger', 'Tiger')}
         </div>
         <div className="controls">
