@@ -1,0 +1,6 @@
+encryptionsalt: v1:9ajBeSnyRtk=:v1:FEg+16HjOawp9R80:Tq3AOzJM3S4Vq29e3HqFq4nd8eST8g==
+config:
+  tigergoat:cloudflareAccountId: c07b72a1d0977acc3547f48da02a5928
+  tigergoat:zoneName: tomv.uk
+  tigergoat:subdomain: tigergoat
+  tigergoat:pagesProject: tigergoat

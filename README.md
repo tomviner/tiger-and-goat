@@ -46,6 +46,30 @@ VITE_ENGINE=local npm --prefix browser run build
 
 The contents of `browser/dist/` are then a complete, backend-free game.
 
+## Deployment
+
+The static build is hosted on **Cloudflare Pages** at
+<https://tigergoat.tomv.uk> (and <https://tigergoat.pages.dev>).
+
+Deploy the content (requires a wrangler login with `pages:write`):
+
+```console
+npm --prefix browser run deploy
+```
+
+This builds the local-engine bundle and uploads it to the `tigergoat` Pages
+project.
+
+DNS and the custom domain are managed with Pulumi in [`infra/`](infra/): it
+looks up the existing `tomv.uk` Cloudflare zone read-only, creates the
+`tigergoat.tomv.uk` CNAME, and attaches the custom domain to the Pages project.
+It needs a `CLOUDFLARE_API_TOKEN` with Zone:Read, DNS:Edit and Pages:Edit:
+
+```console
+cd infra
+CLOUDFLARE_API_TOKEN=<token> pulumi up
+```
+
 ## Checks
 
 ```console
