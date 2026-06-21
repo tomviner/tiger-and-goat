@@ -1,7 +1,7 @@
 import { Set } from 'immutable';
 import React from 'react';
 import { useDrop } from 'react-dnd';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { ItemTypes } from './Constants';
 import { sendMove } from './gameSource';
 import { Move } from './move';
@@ -10,6 +10,7 @@ import {
   engineModeState,
   goatsState,
   historyState,
+  lastEatenSquareState,
   numGoatsToPlaceState,
   playersTurnState,
   possibleMovesState,
@@ -40,7 +41,8 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
   const stateOfGame = useRecoilValue(stateOfGameState);
   const history = useRecoilValue(historyState);
   const numGoatsToPlace = useRecoilValue(numGoatsToPlaceState);
-  const [previousRemoteMove, setPreviousRemoteMove] = useRecoilState(remoteMoveState);
+  const [previousRemoteMove] = useRecoilState(remoteMoveState);
+  const setLastEatenSquare = useSetRecoilState(lastEatenSquareState);
   const controllers = useRecoilValue(controllersState);
   const mode = useRecoilValue(engineModeState);
   const turnSide = playersTurn.playerNum === 1 ? 'goat' : 'tiger';
@@ -72,9 +74,9 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
     const fromPosNum = item.fromPosNum;
     const move = new Move(item.toPlace, fromPosNum, toPosNum);
 
-    // this doesn't work, as it gets overridden below
-    if (move?.eaten) {
-      setPreviousRemoteMove(move.toList());
+    // A human capture (hotseat tiger) animates the eaten goat to the pile.
+    if (move.eaten !== null) {
+      setLastEatenSquare(move.eaten);
     }
 
     const newPlayerNum = playersTurn.otherPlayerNum;
