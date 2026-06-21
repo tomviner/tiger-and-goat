@@ -73,14 +73,18 @@
   cursor: pointer;
 }
 
-@media (max-width: 515px) {
+@media (max-width: 560px) {
+  /* Scale against ~530px, not 500px: the pieces overhang the grid box by
+     ~15px on the left (right: 65px offset), so the visual board is wider than
+     the grid. Scaling against the visual width keeps the left column on
+     screen. min(1, ...) avoids upscaling near the breakpoint. */
   .gameBoard {
-    transform: scale(calc((100vw - 16px) / 500px));
+    transform: scale(min(1, calc((100vw - 24px) / 530px)));
     transform-origin: top center;
   }
   .boardArea {
-    /* reserve the scaled board height (board is 550px tall incl. padding) */
-    height: calc(1.1 * (100vw - 16px));
+    /* reserve the scaled board height (board box is 550px tall incl. padding) */
+    height: min(550px, calc(1.04 * (100vw - 24px)));
   }
 }
 
