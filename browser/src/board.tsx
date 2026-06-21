@@ -53,7 +53,7 @@ function Board(): JSX.Element {
     }, 600);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [engineToMove, result, stateOfGame]);
+  }, [engineToMove, result, stateOfGame, controllers, mode]);
 
   const depthOptions = opponents
     ? Array.from(

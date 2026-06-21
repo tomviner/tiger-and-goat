@@ -115,7 +115,9 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
         isUnderSelf: (monitor.getItem() as ItemType)?.fromPosNum == posNum,
       }),
     }),
-    [posNum, playersTurn, history],
+    // controllers and mode must be here: the drop handler reads them (e.g.
+    // whether the side to move is Human), and they can change between moves.
+    [posNum, playersTurn, history, controllers, mode],
   );
 
   const targetClsNames = getClsNames(
