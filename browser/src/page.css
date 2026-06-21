@@ -1,0 +1,76 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+  text-align: left;
+  line-height: 1.6;
+}
+
+.page h1 {
+  font-size: 26px;
+  margin-bottom: 4px;
+}
+
+.page h2 {
+  font-size: 19px;
+  margin-top: 28px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 4px;
+}
+
+.page code {
+  background: #f3f3f3;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.9em;
+}
+
+.page a {
+  color: #c4661a;
+}
+
+.ladder {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+.ladder th,
+.ladder td {
+  text-align: left;
+  padding: 7px 9px;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+
+.ladder th {
+  color: #777;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ladder .elo {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ladder .wdl {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: #555;
+}
+
+.ladder .desc {
+  color: #444;
+}
+
+.ladder tr.aiRow {
+  background: #fff7ee;
+}
+
+.ladder tr.aiRow code {
+  background: #f6821f;
+  color: #fff;
+}
