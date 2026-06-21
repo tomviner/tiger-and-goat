@@ -4,6 +4,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { Controller, OpponentsInfo } from './api';
 import './board.css';
+import Debug from './Debug';
 import { fetchOpponents, fetchStart, sendMove } from './gameSource';
 import GoatsEaten from './GoatsEaten';
 import GoatsToPlace from './GoatsToPlace';
@@ -170,6 +171,16 @@ function Board(): JSX.Element {
         <GoatsToPlace />
         <div className="boardArea">
           <div className={'gameBoard'}>
+            <div className="fileLabels">
+              {['A', 'B', 'C', 'D', 'E'].map((f) => (
+                <span key={f}>{f}</span>
+              ))}
+            </div>
+            <div className="rankLabels">
+              {[1, 2, 3, 4, 5].map((r) => (
+                <span key={r}>{r}</span>
+              ))}
+            </div>
             {range2d(5, 5)
               .toJS()
               .map(([x, y]) => {
@@ -187,6 +198,7 @@ function Board(): JSX.Element {
         </div>
       </DndProvider>
       <GoatsEaten />
+      <Debug />
     </>
   );
 }

@@ -4,7 +4,46 @@
   grid-template-rows: repeat(5, 100px);
 
   justify-content: center;
+  position: relative;
+  /* top padding leaves room for the pieces' upward overhang; left padding makes
+     room for the rank labels (and absorbs the leftward piece overhang). */
   padding-top: 50px;
+  padding-left: 26px;
+}
+
+/* A1..E5 coordinate labels, positioned in the board's padding so they scale
+   with the board and don't disturb the piece-positioning maths. */
+.fileLabels {
+  position: absolute;
+  top: 14px;
+  left: 26px;
+  display: flex;
+  pointer-events: none;
+  color: #888;
+  font-size: 14px;
+}
+
+.fileLabels span {
+  width: 100px;
+  text-align: center;
+}
+
+.rankLabels {
+  position: absolute;
+  top: 50px;
+  left: 2px;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  color: #888;
+  font-size: 14px;
+}
+
+.rankLabels span {
+  height: 100px;
+  width: 20px;
+  line-height: 100px;
+  text-align: center;
 }
 
 .result {
@@ -74,17 +113,16 @@
 }
 
 @media (max-width: 560px) {
-  /* Scale against ~530px, not 500px: the pieces overhang the grid box by
-     ~15px on the left (right: 65px offset), so the visual board is wider than
-     the grid. Scaling against the visual width keeps the left column on
-     screen. min(1, ...) avoids upscaling near the breakpoint. */
+  /* Scale the board (now 526px wide incl. the label padding) to fit. The left
+     padding absorbs the leftward piece overhang, so 540px leaves a small
+     margin. min(1, ...) avoids upscaling near the breakpoint. */
   .gameBoard {
-    transform: scale(min(1, calc((100vw - 24px) / 530px)));
+    transform: scale(min(1, calc((100vw - 20px) / 540px)));
     transform-origin: top center;
   }
   .boardArea {
     /* reserve the scaled board height (board box is 550px tall incl. padding) */
-    height: min(550px, calc(1.04 * (100vw - 24px)));
+    height: min(550px, calc(1.02 * (100vw - 20px)));
   }
 }
 
