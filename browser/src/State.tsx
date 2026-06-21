@@ -8,6 +8,18 @@ export const playerNumState = atom({
   default: 1,
 });
 
+// Where moves are computed: the Python server, or the engine ported into the
+// browser. A static build can default to 'local' via VITE_ENGINE=local.
+export type EngineMode = 'server' | 'local';
+
+const DEFAULT_ENGINE: EngineMode =
+  import.meta.env.VITE_ENGINE === 'local' ? 'local' : 'server';
+
+export const engineModeState = atom<EngineMode>({
+  key: 'engineModeState',
+  default: DEFAULT_ENGINE,
+});
+
 // Who controls each side. Defaults to the classic setup: you play the goats,
 // the search AI plays the tigers. Either side can be set to Human, AI, or a
 // named strategy via the dropdowns.

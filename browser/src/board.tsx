@@ -2,13 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { Controller, getData, getOpponents, OpponentsInfo, postData } from './api';
+import { Controller, OpponentsInfo } from './api';
 import './board.css';
+import { fetchOpponents, fetchStart, sendMove } from './gameSource';
 import GoatsEaten from './GoatsEaten';
 import GoatsToPlace from './GoatsToPlace';
 import Square from './Square';
 import {
   controllersState,
+  engineModeState,
   playersTurnState,
   resultState,
   stateOfGameState,
@@ -25,14 +27,17 @@ function Board(): JSX.Element {
   const result = useRecoilValue(resultState);
   const [controllers, setControllers] = useRecoilState(controllersState);
   const [opponents, setOpponents] = useState<OpponentsInfo | null>(null);
+  const [mode, setMode] = useRecoilState(engineModeState);
 
+  // (Re)start a game whenever the engine mode changes.
   useEffect(() => {
-    getData().then(setUpdatedGame).catch(console.error);
-    getOpponents().then(setOpponents).catch(console.error);
-  }, []);
+    fetchStart(mode).then(setUpdatedGame).catch(console.error);
+    fetchOpponents(mode).then(setOpponents).catch(console.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   // Auto-advance: whenever the side to move is engine-controlled (AI or a
-  // strategy), ask the server for its move. This drives human-vs-engine,
+  // strategy), ask the engine for its move. This drives human-vs-engine,
   // engine-vs-engine, and strategy-vs-strategy alike, and stops at game over.
   const turnSide: SideKey = playersTurn.playerNum === 1 ? 'goat' : 'tiger';
   const engineToMove = controllers[turnSide].type !== 'human';
@@ -42,7 +47,7 @@ function Board(): JSX.Element {
       return;
     }
     const timer = setTimeout(() => {
-      postData(stateOfGame, null, controllers)
+      sendMove(mode, stateOfGame, null, controllers)
         .then(setUpdatedGame)
         .catch(console.error);
     }, 600);
@@ -147,6 +152,16 @@ function Board(): JSX.Element {
         </div>
         <div className="controls">
           Turn: <b>{playersTurn.name}</b>
+          <label className="sidePicker">
+            Engine:{' '}
+            <select
+              value={mode}
+              onChange={(e) => setMode(e.target.value as typeof mode)}
+            >
+              <option value="server">Server (Python)</option>
+              <option value="local">Local (in-browser)</option>
+            </select>
+          </label>
         </div>
         <GoatsToPlace />
         <div className={'gameBoard'}>

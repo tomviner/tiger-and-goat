@@ -2,11 +2,12 @@ import { Set } from 'immutable';
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { postData } from './api';
 import { ItemTypes } from './Constants';
+import { sendMove } from './gameSource';
 import { Move } from './move';
 import {
   controllersState,
+  engineModeState,
   goatsState,
   historyState,
   numGoatsToPlaceState,
@@ -41,6 +42,7 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
   const numGoatsToPlace = useRecoilValue(numGoatsToPlaceState);
   const [previousRemoteMove, setPreviousRemoteMove] = useRecoilState(remoteMoveState);
   const controllers = useRecoilValue(controllersState);
+  const mode = useRecoilValue(engineModeState);
   const turnSide = playersTurn.playerNum === 1 ? 'goat' : 'tiger';
   const humanToMove = controllers[turnSide].type === 'human';
 
@@ -92,7 +94,7 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
     });
 
     // request remote response move
-    const res = postData(stateOfGame, move.toList(), controllers);
+    const res = sendMove(mode, stateOfGame, move.toList(), controllers);
     // apply remote move
     res.then(setUpdatedGame).catch((error) => {
       console.error(error);
