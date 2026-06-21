@@ -15,16 +15,41 @@
 
 .controls {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 16px;
-  margin: 6px 0;
+  gap: 8px 12px;
+  margin: 6px auto;
+  padding: 0 8px;
+  max-width: 500px;
 }
 
 .sidePicker {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 4px;
+}
+
+/* The board is a fixed 500px (5 x 100px cells with hard-coded piece offsets).
+   On narrow screens scale the whole board down to fit so the page no longer
+   overflows the viewport. Scaling the board scales the pieces with it, so the
+   positioning maths is preserved. */
+.boardArea {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+
+@media (max-width: 515px) {
+  .gameBoard {
+    transform: scale(calc((100vw - 16px) / 500px));
+    transform-origin: top center;
+  }
+  .boardArea {
+    /* reserve the scaled board height (board is 550px tall incl. padding) */
+    height: calc(1.1 * (100vw - 16px));
+  }
 }
 
 .swapButton {

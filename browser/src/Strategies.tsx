@@ -14,6 +14,65 @@ interface Row {
   games: number;
 }
 
+interface GridCell {
+  goatDepth: number;
+  tigerDepth: number;
+  goatWins: number;
+  draws: number;
+  tigerWins: number;
+  goatWinRate: number;
+}
+interface DepthGrid {
+  depths: number[];
+  games: number;
+  rows: GridCell[][];
+}
+
+function DepthHeatmap({ grid }: { grid: DepthGrid }): JSX.Element {
+  const { depths, games, rows } = grid;
+  return (
+    <div className="heatmap">
+      <div className="heatmapTopAxis">tiger search depth →</div>
+      <table>
+        <thead>
+          <tr>
+            <th className="corner" />
+            {depths.map((d) => (
+              <th key={d}>{d}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <tr key={depths[i]}>
+              <th className="rowHead">{depths[i]}</th>
+              {row.map((c) => (
+                <td
+                  key={c.tigerDepth}
+                  className={c.goatDepth === c.tigerDepth ? 'cell diag' : 'cell'}
+                  style={{
+                    background: `hsl(${Math.round(c.goatWinRate * 120)}, 62%, 55%)`,
+                  }}
+                  title={`goat d${c.goatDepth} vs tiger d${c.tigerDepth} — goat won ${c.goatWins}, drew ${c.draws}, lost ${c.tigerWins} of ${games}`}
+                >
+                  {Math.round(c.goatWinRate * 100)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="heatmapLegend">
+        <span className="heatmapLeftAxis">goat depth ↓</span>
+        <span>
+          number = % of {games} games the <b>goat</b> wins · 🟩 goat-favoured · 🟥
+          tiger-favoured · diagonal = equal skill
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function Ladder({ title, rows }: { title: string; rows: Row[] }): JSX.Element {
   return (
     <section>
@@ -50,6 +109,7 @@ function Ladder({ title, rows }: { title: string; rows: Row[] }): JSX.Element {
 
 function Strategies(): JSX.Element {
   const { goat, tiger, games, depths, totalGames } = tournament;
+  const grid = (tournament as { depthGrid?: DepthGrid }).depthGrid;
 
   return (
     <article className="page">
@@ -60,14 +120,33 @@ function Strategies(): JSX.Element {
         <b>search AI</b> (Negamax alpha-beta) at a fixed depth. They all played a
         round-robin: every goat competitor against every tiger competitor.
       </p>
+
+      <h2>Is it easier to play tiger or goat?</h2>
       <p>
-        Each side is rated with <b>Elo</b> on a single shared scale. Goats only ever
-        face tigers (and vice-versa), so the numbers show two things at once: the
-        ranking <i>within</i> a side, and the overall goat/tiger imbalance{' '}
-        <i>between</i> them — tigers sit far higher because, against simple play, the
-        hunt is winnable. Notably, the <b>search AI climbs with depth</b>, and even a
-        shallow search outranks the one-move heuristics — especially for goats, where
-        looking ahead matters most.
+        The clearest test is the AI against itself at controlled depths. Each cell is
+        the share of games the <b>goat</b> wins when a goat searching to one depth meets
+        a tiger searching to another (randomised openings, so it&apos;s an average, not
+        a single line).
+      </p>
+      {grid ? <DepthHeatmap grid={grid} /> : null}
+      <p>
+        Read it two ways. The <b>diagonal</b> (equal depth) is the fair fight: at
+        shallow depth the tiger wins — tigers are the easier side for a beginner, since
+        just grabbing captures works. As both sides look deeper the goats catch up and
+        it tips green: with foresight the goats can wall the tigers in. Off the diagonal
+        you can read the <b>handicap</b> — the lower-left is green (a goat that
+        out-searches the tiger wins), the upper-right is red. So neither side is
+        inherently &quot;easier&quot; with strong play; it&apos;s close, and the side
+        that thinks further ahead wins. The advantage of depth is just much bigger for
+        goats, who have nothing without it.
+      </p>
+
+      <p>
+        Each side is also rated with <b>Elo</b> on a single shared scale. Goats only
+        ever face tigers (and vice-versa), so the numbers show the ranking <i>within</i>{' '}
+        a side and the goat/tiger imbalance <i>between</i> them. The{' '}
+        <b>search AI climbs with depth</b>, and even a shallow search outranks the
+        one-move heuristics — especially for goats, where looking ahead matters most.
       </p>
 
       {totalGames === 0 ? (

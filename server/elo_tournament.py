@@ -19,8 +19,9 @@ from easyAI import Negamax
 from easyAI.AI import TranspositionTable
 
 from .constants import GOAT_PLAYER, TIGER_PLAYER
+from .game import TigerAndGoat
 from .strategies import GOAT_STRATEGIES, TIGER_STRATEGIES
-from .tournament import play_game
+from .tournament import MAX_PLIES, play_game
 
 AI_DEPTHS = [1, 2, 3, 4, 5, 6]
 GAMES = 7
@@ -146,6 +147,63 @@ def run_elo_tournament(games=GAMES, depths=AI_DEPTHS):
         "goat": rows(goats, "goat"),
         "tiger": rows(tigers, "tiger"),
     }
+
+
+def play_with_random_opening(goat, tiger, seed, random_plies=4, max_plies=MAX_PLIES):
+    """Like play_game, but the first `random_plies` moves are random, so two
+    deterministic AIs produce a *distribution* of games rather than one."""
+    game = TigerAndGoat([None, None])
+    rng = random.Random(seed)
+    for ply in range(max_plies):
+        if game.is_over():
+            break
+        if ply < random_plies:
+            move = rng.choice(game.possible_moves())
+        elif game.current_player == GOAT_PLAYER:
+            move = goat.choose(game, rng)
+        else:
+            move = tiger.choose(game, rng)
+        game.play_move(move)
+    return game.get_result_name()
+
+
+def depth_grid(depths=(1, 2, 3, 4, 5), games=6, random_plies=4, max_plies=130):
+    """Goat win-rate for AI(goat depth) vs AI(tiger depth) over randomized
+    openings — the balance-vs-skill picture. A short ply cap keeps deep games
+    from dragging on; an unfinished game counts as a draw."""
+    depths = list(depths)
+    goats, tigers = build_competitors(depths)
+    goat_ai = {c.depth: c for c in goats if c.kind == "ai"}
+    tiger_ai = {c.depth: c for c in tigers if c.kind == "ai"}
+
+    rows = []
+    for gd in depths:
+        row = []
+        for td in depths:
+            wins = losses = draws = 0
+            for g in range(games):
+                seed = 1000 + gd * 100 + td * 10 + g
+                result = play_with_random_opening(
+                    goat_ai[gd], tiger_ai[td], seed, max_plies=max_plies
+                )
+                if result == "goat wins":
+                    wins += 1
+                elif result == "tiger wins":
+                    losses += 1
+                else:  # a real draw, or the ply cap was hit
+                    draws += 1
+            row.append(
+                {
+                    "goatDepth": gd,
+                    "tigerDepth": td,
+                    "goatWins": wins,
+                    "draws": draws,
+                    "tigerWins": losses,
+                    "goatWinRate": round(wins / games, 3),
+                }
+            )
+        rows.append(row)
+    return {"depths": depths, "games": games, "rows": rows}
 
 
 if __name__ == "__main__":

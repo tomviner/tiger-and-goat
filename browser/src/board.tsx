@@ -164,12 +164,14 @@ function Board(): JSX.Element {
           </label>
         </div>
         <GoatsToPlace />
-        <div className={'gameBoard'}>
-          {range2d(5, 5)
-            .toJS()
-            .map(([x, y]) => {
-              return <Square key={`${x},${y}`} x={x} y={y} />;
-            })}
+        <div className="boardArea">
+          <div className={'gameBoard'}>
+            {range2d(5, 5)
+              .toJS()
+              .map(([x, y]) => {
+                return <Square key={`${x},${y}`} x={x} y={y} />;
+              })}
+          </div>
         </div>
       </DndProvider>
       <GoatsEaten />
