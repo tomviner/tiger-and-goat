@@ -135,10 +135,10 @@ function Strategies(): JSX.Element {
         just grabbing captures works. As both sides look deeper the goats catch up and
         it tips green: with foresight the goats can wall the tigers in. Off the diagonal
         you can read the <b>handicap</b> — the lower-left is green (a goat that
-        out-searches the tiger wins), the upper-right is red. So neither side is
-        inherently &quot;easier&quot; with strong play; it&apos;s close, and the side
-        that thinks further ahead wins. The advantage of depth is just much bigger for
-        goats, who have nothing without it.
+        out-searches the tiger wins), the upper-right is red. So tigers rule shallow
+        play, but as both sides search deeper the goats pull ahead — at the deepest
+        equal match here they win outright. Depth is worth far more to the goats, who
+        have nothing without it.
       </p>
 
       <p>

@@ -265,5 +265,227 @@
       "losses": 51,
       "games": 84
     }
-  ]
+  ],
+  "depthGrid": {
+    "depths": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "games": 6,
+    "rows": [
+      [
+        {
+          "goatDepth": 1,
+          "tigerDepth": 1,
+          "goatWins": 0,
+          "draws": 0,
+          "tigerWins": 6,
+          "goatWinRate": 0.0
+        },
+        {
+          "goatDepth": 1,
+          "tigerDepth": 2,
+          "goatWins": 0,
+          "draws": 0,
+          "tigerWins": 6,
+          "goatWinRate": 0.0
+        },
+        {
+          "goatDepth": 1,
+          "tigerDepth": 3,
+          "goatWins": 0,
+          "draws": 0,
+          "tigerWins": 6,
+          "goatWinRate": 0.0
+        },
+        {
+          "goatDepth": 1,
+          "tigerDepth": 4,
+          "goatWins": 0,
+          "draws": 0,
+          "tigerWins": 6,
+          "goatWinRate": 0.0
+        },
+        {
+          "goatDepth": 1,
+          "tigerDepth": 5,
+          "goatWins": 0,
+          "draws": 0,
+          "tigerWins": 6,
+          "goatWinRate": 0.0
+        }
+      ],
+      [
+        {
+          "goatDepth": 2,
+          "tigerDepth": 1,
+          "goatWins": 4,
+          "draws": 1,
+          "tigerWins": 1,
+          "goatWinRate": 0.667
+        },
+        {
+          "goatDepth": 2,
+          "tigerDepth": 2,
+          "goatWins": 0,
+          "draws": 2,
+          "tigerWins": 4,
+          "goatWinRate": 0.0
+        },
+        {
+          "goatDepth": 2,
+          "tigerDepth": 3,
+          "goatWins": 1,
+          "draws": 0,
+          "tigerWins": 5,
+          "goatWinRate": 0.167
+        },
+        {
+          "goatDepth": 2,
+          "tigerDepth": 4,
+          "goatWins": 0,
+          "draws": 1,
+          "tigerWins": 5,
+          "goatWinRate": 0.0
+        },
+        {
+          "goatDepth": 2,
+          "tigerDepth": 5,
+          "goatWins": 0,
+          "draws": 1,
+          "tigerWins": 5,
+          "goatWinRate": 0.0
+        }
+      ],
+      [
+        {
+          "goatDepth": 3,
+          "tigerDepth": 1,
+          "goatWins": 4,
+          "draws": 0,
+          "tigerWins": 2,
+          "goatWinRate": 0.667
+        },
+        {
+          "goatDepth": 3,
+          "tigerDepth": 2,
+          "goatWins": 0,
+          "draws": 2,
+          "tigerWins": 4,
+          "goatWinRate": 0.0
+        },
+        {
+          "goatDepth": 3,
+          "tigerDepth": 3,
+          "goatWins": 0,
+          "draws": 0,
+          "tigerWins": 6,
+          "goatWinRate": 0.0
+        },
+        {
+          "goatDepth": 3,
+          "tigerDepth": 4,
+          "goatWins": 0,
+          "draws": 1,
+          "tigerWins": 5,
+          "goatWinRate": 0.0
+        },
+        {
+          "goatDepth": 3,
+          "tigerDepth": 5,
+          "goatWins": 0,
+          "draws": 1,
+          "tigerWins": 5,
+          "goatWinRate": 0.0
+        }
+      ],
+      [
+        {
+          "goatDepth": 4,
+          "tigerDepth": 1,
+          "goatWins": 6,
+          "draws": 0,
+          "tigerWins": 0,
+          "goatWinRate": 1.0
+        },
+        {
+          "goatDepth": 4,
+          "tigerDepth": 2,
+          "goatWins": 4,
+          "draws": 2,
+          "tigerWins": 0,
+          "goatWinRate": 0.667
+        },
+        {
+          "goatDepth": 4,
+          "tigerDepth": 3,
+          "goatWins": 1,
+          "draws": 3,
+          "tigerWins": 2,
+          "goatWinRate": 0.167
+        },
+        {
+          "goatDepth": 4,
+          "tigerDepth": 4,
+          "goatWins": 1,
+          "draws": 2,
+          "tigerWins": 3,
+          "goatWinRate": 0.167
+        },
+        {
+          "goatDepth": 4,
+          "tigerDepth": 5,
+          "goatWins": 0,
+          "draws": 3,
+          "tigerWins": 3,
+          "goatWinRate": 0.0
+        }
+      ],
+      [
+        {
+          "goatDepth": 5,
+          "tigerDepth": 1,
+          "goatWins": 6,
+          "draws": 0,
+          "tigerWins": 0,
+          "goatWinRate": 1.0
+        },
+        {
+          "goatDepth": 5,
+          "tigerDepth": 2,
+          "goatWins": 5,
+          "draws": 1,
+          "tigerWins": 0,
+          "goatWinRate": 0.833
+        },
+        {
+          "goatDepth": 5,
+          "tigerDepth": 3,
+          "goatWins": 4,
+          "draws": 1,
+          "tigerWins": 1,
+          "goatWinRate": 0.667
+        },
+        {
+          "goatDepth": 5,
+          "tigerDepth": 4,
+          "goatWins": 2,
+          "draws": 3,
+          "tigerWins": 1,
+          "goatWinRate": 0.333
+        },
+        {
+          "goatDepth": 5,
+          "tigerDepth": 5,
+          "goatWins": 4,
+          "draws": 2,
+          "tigerWins": 0,
+          "goatWinRate": 0.667
+        }
+      ]
+    ]
+  }
 }
