@@ -2,9 +2,7 @@ name: Deploy
 
 on:
   push:
-    # codex/deploy-cloudflare is here temporarily to validate the workflow;
-    # it will be narrowed to [main] once confirmed green.
-    branches: [main, codex/deploy-cloudflare]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
