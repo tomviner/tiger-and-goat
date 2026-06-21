@@ -1,0 +1,38 @@
+name: Deploy
+
+on:
+  push:
+    # codex/deploy-cloudflare is here temporarily to validate the workflow;
+    # it will be narrowed to [main] once confirmed green.
+    branches: [main, codex/deploy-cloudflare]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build static bundle and deploy to Cloudflare Pages
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: browser
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '20.19'
+          cache: npm
+          cache-dependency-path: browser/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static (in-browser engine) bundle
+        run: npm run build:static
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: browser
+          command: pages deploy dist --project-name tigergoat --branch main
