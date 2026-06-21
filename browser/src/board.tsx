@@ -30,8 +30,12 @@ function Board(): JSX.Element {
   const [mode, setMode] = useRecoilState(engineModeState);
 
   // (Re)start a game whenever the engine mode changes.
-  useEffect(() => {
+  const newGame = () => {
     fetchStart(mode).then(setUpdatedGame).catch(console.error);
+  };
+
+  useEffect(() => {
+    newGame();
     fetchOpponents(mode).then(setOpponents).catch(console.error);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
@@ -172,6 +176,14 @@ function Board(): JSX.Element {
                 return <Square key={`${x},${y}`} x={x} y={y} />;
               })}
           </div>
+          {result ? (
+            <div className="gameOverOverlay">
+              <div className="gameOverText">{result}</div>
+              <button className="newGameButton" onClick={newGame}>
+                New game
+              </button>
+            </div>
+          ) : null}
         </div>
       </DndProvider>
       <GoatsEaten />

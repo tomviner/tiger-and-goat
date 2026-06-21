@@ -15,6 +15,7 @@ import {
   playersTurnState,
   possibleMovesState,
   remoteMoveState,
+  resultState,
   stateOfGameState,
   tigersState,
   updatedGameState,
@@ -45,8 +46,9 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
   const setLastEatenSquare = useSetRecoilState(lastEatenSquareState);
   const controllers = useRecoilValue(controllersState);
   const mode = useRecoilValue(engineModeState);
+  const result = useRecoilValue(resultState);
   const turnSide = playersTurn.playerNum === 1 ? 'goat' : 'tiger';
-  const humanToMove = controllers[turnSide].type === 'human';
+  const humanToMove = controllers[turnSide].type === 'human' && !result;
 
   const canMove = (
     itemType: string | symbol | null,
@@ -117,9 +119,10 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
         isUnderSelf: (monitor.getItem() as ItemType)?.fromPosNum == posNum,
       }),
     }),
-    // controllers and mode must be here: the drop handler reads them (e.g.
-    // whether the side to move is Human), and they can change between moves.
-    [posNum, playersTurn, history, controllers, mode],
+    // controllers, mode and result must be here: the drop handler reads them
+    // (e.g. whether the side to move is Human, and whether the game is over),
+    // and they can change between moves.
+    [posNum, playersTurn, history, controllers, mode, result],
   );
 
   const targetClsNames = getClsNames(
