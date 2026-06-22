@@ -12,11 +12,14 @@
 }
 
 /* A1..E5 coordinate labels, positioned in the board's padding so they scale
-   with the board and don't disturb the piece-positioning maths. */
+   with the board and don't disturb the piece-positioning maths. The nodes sit
+   at the grid-line intersections (cell corners, where the pieces are), so each
+   100px label is shifted by half a cell to centre on its node column/row
+   rather than on the cell. */
 .fileLabels {
   position: absolute;
   top: 14px;
-  left: 26px;
+  left: -24px; /* 26px (grid left) - 50px (half a cell) */
   display: flex;
   pointer-events: none;
   color: #888;
@@ -30,7 +33,7 @@
 
 .rankLabels {
   position: absolute;
-  top: 50px;
+  top: 0; /* 50px (grid top) - 50px (half a cell) */
   left: 2px;
   display: flex;
   flex-direction: column;
