@@ -126,22 +126,25 @@ class TigerAndGoat(TwoPlayerGame):
     def empty(self):
         return ALL_POS_NUMS - set(self.pieces)
 
-    def is_repeat(self, coords):
+    def repetition_count(self):
+        """How many times the current position has occurred with the same side
+        to move. Positions alternate side to move each ply, so same-side
+        occurrences are every second entry counting back from the latest."""
         if self.goats_to_place:
-            return False
-        new_pieces = self.pieces.copy()
-        apply_move(coords, new_pieces)
-        return new_pieces.canonical in self.history
+            return 1
+        current = self.pieces.canonical
+        return sum(entry == current for entry in list(self.history)[-1::-2])
+
+    def is_threefold(self):
+        return not self.goats_to_place and self.repetition_count() >= 3
 
     def get_steps(self, nodes, short_circuit=False):
         for node in nodes:
             for dest in STEPS_GRAPH[node]:
                 if dest not in self.pieces:
-                    coords = node, dest
-                    if not self.is_repeat(coords):
-                        yield coords
-                        if short_circuit:
-                            break
+                    yield node, dest
+                    if short_circuit:
+                        break
 
     def tiger_steps(self, short_circuit):
         yield from self.get_steps(self.pieces.inverse[TIGER_CHAR], short_circuit)
@@ -190,10 +193,15 @@ class TigerAndGoat(TwoPlayerGame):
         return self.tigers_go() and not self.mobile_tigers()
 
     def is_draw(self):
-        """If tiger can't move it loses. If goat can't move, we call it a draw,
-        because we'd rather not incentivise this non-decisive behaviour
+        """A draw is the same position three times (repetition), or — in the
+        movement phase on the goat's turn — the goats having no legal move (a
+        non-decisive stalemate we don't reward).
         """
-        if self.goats_to_place or self.tigers_go():
+        if self.goats_to_place:
+            return False
+        if self.is_threefold():
+            return True
+        if self.tigers_go():
             return False
         return not list(self.goat_moves())
 
@@ -211,9 +219,11 @@ class TigerAndGoat(TwoPlayerGame):
     def get_result_name(self):
         if self.tiger_wins():
             return "tiger wins"
-        elif self.goat_wins():
+        if self.goat_wins():
             return "goat wins"
-        elif self.is_draw():
+        if self.is_threefold():
+            return "draw (threefold repetition)"
+        if self.is_draw():
             return "draw (as goat can't move)"
         return ""
 

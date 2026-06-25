@@ -34,8 +34,8 @@ function Rules(): JSX.Element {
           🐐 <b>Goats win</b> by <b>trapping every tiger</b> so that no tiger can move.
         </li>
         <li>
-          If the goats have no legal move (and none left to place), it&apos;s a{' '}
-          <b>draw</b>.
+          It&apos;s a <b>draw</b> if the same position occurs three times (repetition),
+          or if the goats have no legal move with none left to place.
         </li>
       </ul>
 

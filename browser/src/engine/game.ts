@@ -72,16 +72,24 @@ export function stateFromHistory(
 const occupied = (state: EngineState): Set<number> =>
   new Set([...state.tigers, ...state.goats]);
 
-function isRepeat(state: EngineState, move: Move): boolean {
+function repetitionCount(state: EngineState): number {
   if (state.goatsToPlace > 0) {
-    return false;
+    return 1;
   }
-  // apply the (step) move to a copy of the goats/tigers and check the result
-  const tigers = new Set(state.tigers);
-  const goats = new Set(state.goats);
-  applyToSets(move, tigers, goats);
-  const candidate = key([sorted(tigers), sorted(goats)]);
-  return state.history.some((p) => key(p) === candidate);
+  // The latest history entry is the current position with the current side to
+  // move; positions alternate side to move, so step back two at a time.
+  const current = key(canonical(state));
+  let count = 0;
+  for (let i = state.history.length - 1; i >= 0; i -= 2) {
+    if (key(state.history[i]) === current) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
+export function isThreefold(state: EngineState): boolean {
+  return state.goatsToPlace === 0 && repetitionCount(state) >= 3;
 }
 
 export function applyToSets(move: Move, tigers: Set<number>, goats: Set<number>): void {
@@ -123,7 +131,7 @@ function tigerSteps(state: EngineState): Move[] {
   const moves: Move[] = [];
   for (const t of state.tigers) {
     for (const dest of STEPS[t]) {
-      if (!occ.has(dest) && !isRepeat(state, [t, dest])) {
+      if (!occ.has(dest)) {
         moves.push([t, dest]);
       }
     }
@@ -147,7 +155,7 @@ function goatSteps(state: EngineState): Move[] {
   const moves: Move[] = [];
   for (const g of state.goats) {
     for (const dest of STEPS[g]) {
-      if (!occ.has(dest) && !isRepeat(state, [g, dest])) {
+      if (!occ.has(dest)) {
         moves.push([g, dest]);
       }
     }
@@ -170,7 +178,7 @@ export function mobileTigers(state: EngineState): number {
       (dest) => state.goats.has((t + dest) / 2) && !occ.has(dest),
     );
     if (!mobile) {
-      mobile = STEPS[t].some((dest) => !occ.has(dest) && !isRepeat(state, [t, dest]));
+      mobile = STEPS[t].some((dest) => !occ.has(dest));
     }
     if (mobile) {
       sources.add(t);
@@ -192,7 +200,13 @@ export const goatWins = (state: EngineState): boolean =>
   tigersGo(state) && mobileTigers(state) === 0;
 
 export function isDraw(state: EngineState): boolean {
-  if (state.goatsToPlace > 0 || tigersGo(state)) {
+  if (state.goatsToPlace > 0) {
+    return false;
+  }
+  if (isThreefold(state)) {
+    return true;
+  }
+  if (tigersGo(state)) {
     return false;
   }
   return possibleMoves(state).length === 0;
@@ -207,6 +221,9 @@ export function resultName(state: EngineState): string {
   }
   if (goatWins(state)) {
     return 'goat wins';
+  }
+  if (isThreefold(state)) {
+    return 'draw (threefold repetition)';
   }
   if (isDraw(state)) {
     return "draw (as goat can't move)";
