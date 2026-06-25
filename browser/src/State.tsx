@@ -43,6 +43,13 @@ export const resultState = atom({
   default: '',
 });
 
+// Every move played this game, in order (goat moves first, then alternating),
+// for the debug move list. Each move is [place], [from, to] or [from, eaten, to].
+export const moveLogState = atom<number[][]>({
+  key: 'moveLogState',
+  default: [],
+});
+
 // The board square a goat was last captured from, used to animate it flying to
 // the eaten pile. Set for any capture — by the AI/strategy (a remote move) or
 // by a human (in hotseat) — so the animation works regardless of who jumped.

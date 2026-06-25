@@ -26,7 +26,7 @@
 
 .debug textarea,
 .debug .debugMoves,
-.debug .debugHistory {
+.debug .debugMoveList {
   width: 100%;
   box-sizing: border-box;
   font-family: ui-monospace, Menlo, monospace;
@@ -47,11 +47,29 @@
   word-break: break-word;
 }
 
-.debug .debugHistory {
+.debug .debugMoveList {
   margin: 0;
-  padding-left: 22px;
-  max-height: 160px;
+  padding-left: 28px;
+  max-height: 200px;
   overflow-y: auto;
+}
+
+.debug .debugMoveList li {
+  margin: 1px 0;
+}
+
+.debug .debugMoveList .goatMove,
+.debug .debugMoveList .tigerMove {
+  display: inline-block;
+  width: 90px;
+}
+
+.debug .debugMoveList .goatMove::before {
+  content: '🐐 ';
+}
+
+.debug .debugMoveList .tigerMove::before {
+  content: '🐅 ';
 }
 
 .debug button {

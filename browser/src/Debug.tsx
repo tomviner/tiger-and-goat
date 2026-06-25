@@ -1,25 +1,17 @@
-import { List, Set } from 'immutable';
+import { List } from 'immutable';
 import React, { useState } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import './Debug.css';
 import { describeState } from './gameSource';
-import { moveToNotation, posToNotation } from './notation';
+import { moveToNotation, movesFromHistory } from './notation';
 import {
-  historyState,
+  moveLogState,
   numGoatsToPlaceState,
   playerNumState,
   possibleMovesState,
   stateOfGameState,
   updatedGameState,
 } from './State';
-
-function notatePieces(set: Set<number>): string {
-  return set
-    .toArray()
-    .sort((a, b) => a - b)
-    .map(posToNotation)
-    .join(' ');
-}
 
 function Debug(): JSX.Element {
   const [open, setOpen] = useState(false);
@@ -28,10 +20,11 @@ function Debug(): JSX.Element {
 
   const stateOfGame = useRecoilValue(stateOfGameState);
   const possibleMoves = useRecoilValue(possibleMovesState);
-  const history = useRecoilValue(historyState);
   const playerNum = useRecoilValue(playerNumState);
   const numGoatsToPlace = useRecoilValue(numGoatsToPlaceState);
+  const moveLog = useRecoilValue(moveLogState);
   const setUpdatedGame = useSetRecoilState(updatedGameState);
+  const setMoveLog = useSetRecoilState(moveLogState);
 
   const stateJson = JSON.stringify({
     playerNum,
@@ -44,10 +37,17 @@ function Debug(): JSX.Element {
     .map((m: List<number>) => moveToNotation(m.toArray()))
     .sort();
 
+  // Goat moves first, then alternating, so pair them into numbered turns.
+  const turns: number[][][] = [];
+  for (let i = 0; i < moveLog.length; i += 2) {
+    turns.push([moveLog[i], moveLog[i + 1]]);
+  }
+
   const load = () => {
     try {
       const parsed = JSON.parse(loadText);
       setUpdatedGame(describeState(parsed));
+      setMoveLog(movesFromHistory(parsed.history));
       setLoadError('');
     } catch (e) {
       setLoadError(String(e));
@@ -68,12 +68,12 @@ function Debug(): JSX.Element {
         Debug ▾
       </button>
 
-      <h4>Board history (oldest → newest)</h4>
-      <ol className="debugHistory">
-        {history.toArray().map((pos, i) => (
+      <h4>Moves ({moveLog.length})</h4>
+      <ol className="debugMoveList">
+        {turns.map(([goat, tiger], i) => (
           <li key={i}>
-            🐅 {notatePieces(pos.get(0, Set<number>()))} &nbsp;|&nbsp; 🐐{' '}
-            {notatePieces(pos.get(1, Set<number>()))}
+            <span className="goatMove">{moveToNotation(goat)}</span>
+            {tiger ? <span className="tigerMove">{moveToNotation(tiger)}</span> : null}
           </li>
         ))}
       </ol>

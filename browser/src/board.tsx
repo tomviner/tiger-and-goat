@@ -12,6 +12,7 @@ import Square from './Square';
 import {
   controllersState,
   engineModeState,
+  moveLogState,
   playersTurnState,
   resultState,
   stateOfGameState,
@@ -29,9 +30,11 @@ function Board(): JSX.Element {
   const [controllers, setControllers] = useRecoilState(controllersState);
   const [opponents, setOpponents] = useState<OpponentsInfo | null>(null);
   const [mode, setMode] = useRecoilState(engineModeState);
+  const setMoveLog = useSetRecoilState(moveLogState);
 
   // (Re)start a game whenever the engine mode changes.
   const newGame = () => {
+    setMoveLog([]);
     fetchStart(mode).then(setUpdatedGame).catch(console.error);
   };
 
@@ -53,7 +56,13 @@ function Board(): JSX.Element {
     }
     const timer = setTimeout(() => {
       sendMove(mode, stateOfGame, null, controllers)
-        .then(setUpdatedGame)
+        .then((updated) => {
+          const remoteMove = updated.remoteMove;
+          if (remoteMove) {
+            setMoveLog((log) => [...log, remoteMove.toArray()]);
+          }
+          setUpdatedGame(updated);
+        })
         .catch(console.error);
     }, 600);
     return () => clearTimeout(timer);

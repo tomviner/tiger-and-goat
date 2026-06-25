@@ -11,6 +11,7 @@ import {
   goatsState,
   historyState,
   lastEatenSquareState,
+  moveLogState,
   numGoatsToPlaceState,
   playersTurnState,
   possibleMovesState,
@@ -44,6 +45,7 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
   const numGoatsToPlace = useRecoilValue(numGoatsToPlaceState);
   const [previousRemoteMove] = useRecoilState(remoteMoveState);
   const setLastEatenSquare = useSetRecoilState(lastEatenSquareState);
+  const setMoveLog = useSetRecoilState(moveLogState);
   const controllers = useRecoilValue(controllersState);
   const mode = useRecoilValue(engineModeState);
   const result = useRecoilValue(resultState);
@@ -97,14 +99,26 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
       remoteMove: previousRemoteMove,
     });
 
+    // record the human move (the engine reply is recorded on the response)
+    setMoveLog((log) => [...log, move.toList().toArray()]);
+
     // request remote response move
     const res = sendMove(mode, stateOfGame, move.toList(), controllers);
     // apply remote move
-    res.then(setUpdatedGame).catch((error) => {
-      console.error(error);
-      // error with fetching and applying remote move, revert local move
-      setUpdatedGame(updatedGame);
-    });
+    res
+      .then((updated) => {
+        const remoteMove = updated.remoteMove;
+        if (remoteMove) {
+          setMoveLog((log) => [...log, remoteMove.toArray()]);
+        }
+        setUpdatedGame(updated);
+      })
+      .catch((error) => {
+        console.error(error);
+        // error with fetching and applying remote move, revert local move
+        setMoveLog((log) => log.slice(0, -1));
+        setUpdatedGame(updatedGame);
+      });
   };
 
   const [{ isOver, canDrop, isUnderSelf }, drop] = useDrop(
