@@ -36,9 +36,9 @@ export const getOpponents = (): Promise<OpponentsInfo> =>
     throw Error(`${value.status} ${value.problem}`);
   });
 
-const checkResponse = (value: ApiResponse<UpdatedGameType>) => {
-  const { ok, data, problem, status } = value;
-
+// Convert a plain /move or /start payload (from the server or the local engine)
+// into the Immutable shape the app uses.
+export const parseUpdatedGame = (data: unknown): UpdatedGameType => {
   const isSetPath = (path: (string | number)[]) =>
     // playerNum: number;
     // numGoatsToPlace: number;
@@ -60,9 +60,14 @@ const checkResponse = (value: ApiResponse<UpdatedGameType>) => {
         ? sequence.toSet()
         : sequence.toList();
   };
+  // we want an object (not a Map) containing immutable types
+  return fromJS(data, reviver).toObject() as unknown as UpdatedGameType;
+};
+
+const checkResponse = (value: ApiResponse<UpdatedGameType>) => {
+  const { ok, data, problem, status } = value;
   if (ok) {
-    // we want an object (not a Map) containing immutable types
-    return fromJS(data, reviver).toObject() as unknown as UpdatedGameType;
+    return parseUpdatedGame(data);
   }
   throw Error(`${status} ${problem}`);
 };

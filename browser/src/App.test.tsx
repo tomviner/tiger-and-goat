@@ -3,10 +3,10 @@ import React from 'react';
 import { test, vi } from 'vitest';
 import App from './App';
 
-vi.mock('./api', () => ({
-  getData: vi.fn(() => new Promise(() => undefined)),
-  getOpponents: vi.fn(() => new Promise(() => undefined)),
-  postData: vi.fn(),
+vi.mock('./gameSource', () => ({
+  fetchStart: vi.fn(() => new Promise(() => undefined)),
+  fetchOpponents: vi.fn(() => new Promise(() => undefined)),
+  sendMove: vi.fn(),
 }));
 
 test('renders learn react link', () => {
