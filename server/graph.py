@@ -1,6 +1,5 @@
 "Compiled board move graphs using pos nums. See tests for how these were formed."
 
-
 # Maps a board pos_num to the pos_nums that can be directly stepped to
 STEPS_GRAPH = {
     0: [1, 5, 6],

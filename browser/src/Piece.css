@@ -1,24 +1,24 @@
 .tiger:after {
-    content: "🐅";
+  content: '🐅';
 }
 
 .goat:after {
-    content: "🐐";
+  content: '🐐';
 }
 
-.tiger:after, .goat:after {
-    font-size: 50px;
+.tiger:after,
+.goat:after {
+  font-size: 50px;
 }
 
 .piece {
-    right: 65px;
-    bottom: 75px;
-    position: absolute;
-    cursor: move;
-    /*font-size: 50px;*/
-    transition: all 1s;
-    z-index: 5;
-
+  right: 65px;
+  bottom: 75px;
+  position: absolute;
+  cursor: move;
+  /*font-size: 50px;*/
+  transition: all 1s;
+  z-index: 5;
 }
 
 /*.justMoved {
@@ -33,15 +33,15 @@
 }*/
 
 /*.piece.setOldRemoteMoveIsPlace {*/
-    /*transform: translate(-20px, -20px);*/
-    /*right: 85px;
+/*transform: translate(-20px, -20px);*/
+/*right: 85px;
     bottom: 375px;*/
 
-    /*position: relative;*/
+/*position: relative;*/
 
-    /*font-size: 16px;*/
-    /*transform: scale(.32)*/
-    /*transition: none 15s ease-in-out;*/
+/*font-size: 16px;*/
+/*transform: scale(.32)*/
+/*transition: none 15s ease-in-out;*/
 /*}*/
 
 /*.toPlace:after {
@@ -52,6 +52,6 @@
 }*/
 
 .piece.isDragging {
-    opacity: 0.5;
-    cursor: move;
+  opacity: 0.5;
+  cursor: move;
 }

@@ -1,12 +1,11 @@
 import time
 from collections import deque
 
-from easyAI import AI_Player, Negamax, TwoPlayersGame
-from easyAI.AI import TT
-from funcy import collecting
+from easyAI import AI_Player, Negamax, TwoPlayerGame
+from easyAI.AI import TranspositionTable
 
-from board import display
-from constants import (
+from .board import display
+from .constants import (
     GOAT_CHAR,
     GOAT_PLAYER,
     NUM_EATEN_LOSE,
@@ -15,10 +14,9 @@ from constants import (
     TIGER_CHAR,
     TIGER_PLAYER,
 )
-from graph import JUMPS_GRAPH, STEPS_GRAPH
-from ls import log
-from notations import ALL_POS_NUMS, notation_to_pos_num, pos_num_to_notation
-from pieces import Pieces
+from .graph import JUMPS_GRAPH, STEPS_GRAPH
+from .notations import ALL_POS_NUMS, notation_to_pos_num, pos_num_to_notation
+from .pieces import Pieces
 
 
 def apply_move(coords, pieces):
@@ -47,7 +45,7 @@ def unapply_move(coords, pieces):
         pieces[eaten] = GOAT_CHAR
 
 
-class TigerAndGoat(TwoPlayersGame):
+class TigerAndGoat(TwoPlayerGame):
     history_max_len = 20
 
     def __init__(self, players):
@@ -55,7 +53,7 @@ class TigerAndGoat(TwoPlayersGame):
         self.pieces = self.initial_pieces()
         self.goats_to_place = NUM_GOATS
         # goat always starts
-        self.nplayer = GOAT_PLAYER
+        self.current_player = GOAT_PLAYER
         # check for repetition against the most recent states.
         # just far back enough to prevent endless loops.
         # AI lookahead will append and then pop (upon unmove), so this must be sized as
@@ -72,21 +70,21 @@ class TigerAndGoat(TwoPlayersGame):
         history = (self.history[-1],) if self.goats_to_place else tuple(self.history)
         if json_safe:
             history = tuple(list(map(list, pieces)) for pieces in history)
-        return (self.nplayer, self.goats_to_place, history)
+        return (self.current_player, self.goats_to_place, history)
 
     def as_dict(self):
-        nplayer, goats_to_place, history = self.ttentry(json_safe=True)
+        current_player, goats_to_place, history = self.ttentry(json_safe=True)
 
         return {
-            'playerNum': nplayer,
-            'numGoatsToPlace': goats_to_place,
-            'history': history,
-            'possibleMoves': self.possible_moves(),
-            'result': self.get_result_name(),
+            "playerNum": current_player,
+            "numGoatsToPlace": goats_to_place,
+            "history": history,
+            "possibleMoves": self.possible_moves(),
+            "result": self.get_result_name(),
         }
 
     def ttrestore(self, entry):
-        self.nplayer, self.goats_to_place, history = entry
+        self.current_player, self.goats_to_place, history = entry
 
         canonical = history[-1]
 
@@ -107,14 +105,12 @@ class TigerAndGoat(TwoPlayersGame):
         except ValueError:
             raise
 
-    @log
     def make_move(self, coords):
         apply_move(coords, self.pieces)
         if len(coords) == 1:
             self.goats_to_place -= 1
         self.history.append(self.pieces.canonical)
 
-    @log
     def unmake_move(self, coords):
         unapply_move(coords, self.pieces)
         if len(coords) == 1:
@@ -122,18 +118,13 @@ class TigerAndGoat(TwoPlayersGame):
         self.history.pop()
 
     def tigers_go(self):
-        return self.nplayer == TIGER_PLAYER
+        return self.current_player == TIGER_PLAYER
 
     def goats_go(self):
-        return self.nplayer == GOAT_PLAYER
+        return self.current_player == GOAT_PLAYER
 
     def empty(self):
         return ALL_POS_NUMS - set(self.pieces)
-
-    def unique_positions(self):
-        "Given a single goat's rotational and mirror symmetries"
-        # For placing the first goat: use the upper half of the top-left quadrant
-        return {0, 1, 2, 6, 7, 12}
 
     def is_repeat(self, coords):
         if self.goats_to_place:
@@ -169,12 +160,7 @@ class TigerAndGoat(TwoPlayersGame):
         return len({mv[0] for mv in self.tiger_moves(short_circuit=True)})
 
     def goat_placements(self):
-        # first goat placed only need consider unique positions
-        if self.pieces == STARTING_TIGERS:
-            positions = self.unique_positions() - self.pieces.inverse[TIGER_CHAR]
-        else:
-            positions = self.empty()
-        return [(pos,) for pos in positions]
+        return [(pos,) for pos in sorted(self.empty())]
 
     def goat_steps(self):
         yield from self.get_steps(self.pieces.inverse[GOAT_CHAR])
@@ -189,13 +175,10 @@ class TigerAndGoat(TwoPlayersGame):
         else:
             yield from self.goat_steps()
 
-    @log
-    @collecting
     def possible_moves(self):
         if self.tigers_go():
-            yield from self.tiger_moves()
-        else:
-            yield from self.goat_moves()
+            return list(self.tiger_moves())
+        return list(self.goat_moves())
 
     def goats_eaten(self):
         return NUM_GOATS - self.goats_to_place - len(self.pieces) + 4
@@ -217,24 +200,23 @@ class TigerAndGoat(TwoPlayersGame):
     def show(self):
         display(self.pieces, self.goats_to_place, self.goats_eaten())
         if self.tiger_wins():
-            print('5 goats eaten, TIGER WINS!')
+            print("5 goats eaten, TIGER WINS!")
         elif self.goat_wins():
-            print('tiger cannot move, GOAT WINS!')
+            print("tiger cannot move, GOAT WINS!")
         elif self.is_draw():
-            print('goat cannot move, A DRAW!')
+            print("goat cannot move, A DRAW!")
         score = abs(self.scoring())
-        print('score:', score, 'x' * score)
+        print("score:", score, "x" * score)
 
     def get_result_name(self):
         if self.tiger_wins():
-            return 'tiger wins'
+            return "tiger wins"
         elif self.goat_wins():
-            return 'goat    wins'
+            return "goat wins"
         elif self.is_draw():
             return "draw (as goat can't move)"
-        return ''
+        return ""
 
-    @log
     def scoring(self):
         # Logic written from tiger point of view, and flipped at end.
         # Higher score, better for tigers.
@@ -246,17 +228,18 @@ class TigerAndGoat(TwoPlayersGame):
         if not mobile_tigers and self.goats_go():
             mobile_tigers = 1
 
-        # if self.goats_eaten() >= NUM_EATEN_LOSE:
-        #     score = 100
-        # elif not mobile_tigers:
-        #     score = -100
-        # else:
-        score = 10 * self.goats_eaten() + mobile_tigers
+        if self.tiger_wins():
+            score = 100
+        elif self.goat_wins():
+            score = -100
+        elif self.is_draw():
+            score = 0
+        else:
+            score = 10 * self.goats_eaten() + mobile_tigers
         if self.goats_go():
             score *= -1
         return score
 
-    @log
     def is_over(self):
         return self.tiger_wins() or self.goat_wins() or self.is_draw()
 
@@ -264,18 +247,18 @@ class TigerAndGoat(TwoPlayersGame):
 if __name__ == "__main__":
     kw1, kw2 = {}, {}
     if 1:
-        kw1 = {'tt': TT()}
-        kw2 = {'tt': TT()}
+        kw1 = {"tt": TranspositionTable()}
+        kw2 = {"tt": TranspositionTable()}
     goat_ai = Negamax(6, **kw1)
     tiger_ai = Negamax(6, **kw2)
-    game = TigerAndGoat([AI_Player(goat_ai, 'goat'), AI_Player(tiger_ai, 'tiger')])
+    game = TigerAndGoat([AI_Player(goat_ai, "goat"), AI_Player(tiger_ai, "tiger")])
 
     start = time.monotonic()
     game.play(500)
 
     duration = time.monotonic() - start
     move_duration = duration / game.nmove
-    print('duration', f'{duration:.1f} secs, {move_duration:.2f} secs / move')
+    print("duration", f"{duration:.1f} secs, {move_duration:.2f} secs / move")
 
 #  8: duration 172 seconds
 #  9:  99 moves / 360 seconds

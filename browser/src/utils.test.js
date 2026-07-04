@@ -1,5 +1,5 @@
 import { List } from 'immutable';
-import { mockRandomForEach } from 'jest-mock-random';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { getClsNames, rand, range2d, sum } from './utils';
 
 describe('2d range', () => {
@@ -24,20 +24,22 @@ describe('sum', () => {
 });
 
 describe('rand', () => {
+  afterEach(() => vi.restoreAllMocks());
+
   test('returns certain chance as true', () => {
     expect(rand(1)).toEqual(true);
   });
 
   describe('non-int chances that come true', () => {
-    mockRandomForEach([0.1, 0.5, 0.9]);
     test('compares accurately', () => {
+      vi.spyOn(Math, 'random').mockReturnValue(0.5);
       expect(rand(0.9)).toEqual(true);
     });
   });
 
   describe('non-int chances that come false', () => {
-    mockRandomForEach([0.1, 0.5, 0.9]);
     test('compares accurately', () => {
+      vi.spyOn(Math, 'random').mockReturnValue(0.5);
       expect(rand(0.09)).toEqual(false);
     });
   });

@@ -12,7 +12,7 @@ export const numGoatsToPlaceState = atom({
   default: NUM_GOATS,
 });
 
-export const possibleMovesState = atom({
+export const possibleMovesState = atom<Set<List<number>>>({
   key: 'possibleMovesState',
   default: Set() as Set<List<number>>,
 });
@@ -22,7 +22,7 @@ export const resultState = atom({
   default: '',
 });
 
-export const historyState = atom({
+export const historyState = atom<List<List<Set<number>>>>({
   key: 'historyState',
   default: List() as List<List<Set<number>>>,
 });
@@ -32,21 +32,21 @@ export const remoteMoveState = atom<List<number> | null>({
   default: null as List<number> | null,
 });
 
-export const tigersState = selector({
+export const tigersState = selector<Set<number>>({
   key: 'tigersState',
   get: ({ get }) => {
     const history = get(historyState);
-    const lastPieces = history.last(List()) as List<Set<number>>;
-    return lastPieces.get(0, Set());
+    const lastPieces = history.last(List<Set<number>>());
+    return lastPieces.get(0, Set<number>());
   },
 });
 
-export const goatsState = selector({
+export const goatsState = selector<Set<number>>({
   key: 'goatsState',
   get: ({ get }) => {
     const history = get(historyState);
-    const lastPieces = history.last(List()) as List<Set<number>>;
-    return lastPieces.get(1, Set());
+    const lastPieces = history.last(List<Set<number>>());
+    return lastPieces.get(1, Set<number>());
   },
 });
 

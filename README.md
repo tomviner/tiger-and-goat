@@ -1,6 +1,39 @@
-# tiger-and-goat
-Tigers and Goats (Bagha Chal, Moving Tigers)
+# Tigers and Goats
 
-![image](https://user-images.githubusercontent.com/167319/118411211-50f6e800-b68b-11eb-86e1-9575bf42a517.png)
+A browser implementation of Bagh-Chal (Tigers and Goats), with a Python game
+server and a React client.
 
-![image](https://user-images.githubusercontent.com/167319/118411970-41799e00-b68f-11eb-9c3f-a51e407bbb00.png)
+## Requirements
+
+- [uv](https://docs.astral.sh/uv/)
+- Node.js 20.19 or newer
+
+## Setup
+
+```console
+uv sync
+npm --prefix browser ci
+```
+
+Run the API and browser client in separate terminals:
+
+```console
+make server
+make browser
+```
+
+Then open <http://localhost:3000>. The API documentation is available at
+<http://localhost:8000/docs>.
+
+## Checks
+
+```console
+make test
+make lint
+make build
+```
+
+The Python dependencies are locked in `uv.lock`; browser dependencies are
+locked in `browser/package-lock.json`.
+
+See [TODO.md](TODO.md) for the current engineering roadmap.

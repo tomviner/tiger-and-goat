@@ -28,17 +28,8 @@ function Piece({ type, posNum, setPieceUnderDrag }: PieceProps): JSX.Element {
   const [remoteMoveApplied, setRemoteMoveApplied] = useState(false);
 
   const [y, x] = divmod(posNum, 5);
-  // console.log(
-  //   '1 remoteMove',
-  //   remoteMove?.toJS(),
-  //   remoteMove !== null,
-  //   remoteMove !== undefined,
-  //   remoteMove !== null && remoteMove !== undefined,
-  // );
   const remoteMoveObj =
     remoteMove !== null && remoteMove !== undefined ? Move.fromList(remoteMove) : null;
-  // console.log('2 remoteMoveObj', remoteMoveObj?.toJS());
-  // console.log();
 
   const [{ isDragging }, drag] = useDrag(() => ({
     type,
@@ -46,12 +37,6 @@ function Piece({ type, posNum, setPieceUnderDrag }: PieceProps): JSX.Element {
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
-    // end: (item, monitor) => {
-    //   if (monitor.didDrop()) {
-    //     // const { move } = monitor.getDropResult() as getDropResultType;
-    //     // console.log('move', move.toJS());
-    //   }
-    // },
   }));
 
   const [{ isUnder, isUnderSelf }, drop] = useDrop(() => ({
@@ -70,50 +55,15 @@ function Piece({ type, posNum, setPieceUnderDrag }: PieceProps): JSX.Element {
   const justMoved = remoteMoveObj?.toPosNum === posNum;
   const setOldRemoteMove = justMoved && !remoteMoveApplied;
 
+  // After the piece renders offset back to its source square, flip the flag so
+  // a re-render clears the offset and the CSS transition glides it forward.
   useEffect(() => {
-    // const moveClsNames: Record<string, unknown> = {};
-    // let dx = 0;
-    // // Math.floor(Math.random() * 10);
-    // let dy = 0;
-
-    // if (remoteMoveObj?.toPosNum === posNum) {
-    //   console.log('----', remoteMoveObj && remoteMove
-    // Obj.toList().toJS(), 'to', posNum);
-
-    //   if (remoteMoveObj.toPlace) {
     setRemoteMoveApplied(justMoved);
-    //     moveClsNames['toPlace'] = true;
-    //     dx = -10;
-    //     dy = -10;
-    //   } else if (remoteMoveObj.fromPosNum !==
-    // null && remoteMoveObj.toPosNum !== null) {
-    //     if (remoteMoveObj.eaten === null) {
-    //       dx = 20;
-    //       dy = -20;
-    //     } else {
-    //       dx = -30;
-    //       dy = 30;
-    //     }
-    //   }
-    // }
   }, [remoteMove]);
-
-  // const style = {
-  //   // right: `${65 + dx * 0.9}px`,
-  //   // bottom: `${75 + dy * 0.9}px`,
-  //   // transform: `translate(10%, 30%)`,
-  //   // ${dx}px, ${dy}px
-  //   // transition: 'all 1s ease-in-out',
-  // };
-  // if (Object.keys(style).length) {
-  //   // console.log(style);
-  // }
 
   const getStyle = () => {
     if (setOldRemoteMove) {
-      console.log('type', type, 'remoteMoveObj', remoteMoveObj?.toJS());
       if (remoteMoveObj?.toPlace) {
-        console.log(type, 'place');
         return {
           right: `${65 + 100 * (x - 2)}px`,
           bottom: `${75 + 100 * (y + 0.5)}px`,
@@ -121,18 +71,13 @@ function Piece({ type, posNum, setPieceUnderDrag }: PieceProps): JSX.Element {
         };
       } else if (remoteMoveObj?.fromPosNum !== null) {
         const [oldY, oldX] = divmod(remoteMoveObj?.fromPosNum as number, 5);
-        console.log(type, 'move or step');
-        if (type == ItemTypes.GOAT) {
-          return {
-            right: `${100 * (x - oldX)}px`,
-            bottom: `${100 * (y - oldY)}px`,
-          };
-        } else {
-          return {
-            right: `${65 + 100 * (x - oldX)}px`,
-            bottom: `${75 + 100 * (y - oldY)}px`,
-          };
-        }
+        // Start the FLIP animation from the source square. Tigers and goats
+        // share the same resting offset (right: 65px, bottom: 75px), so both
+        // keep that base when offsetting back to the source.
+        return {
+          right: `${65 + 100 * (x - oldX)}px`,
+          bottom: `${75 + 100 * (y - oldY)}px`,
+        };
       }
     }
     return {};
@@ -141,10 +86,6 @@ function Piece({ type, posNum, setPieceUnderDrag }: PieceProps): JSX.Element {
   const clsNames = getClsNames(
     {
       isDragging,
-      // toPlace,
-      // toSetToPlace: toSetToPlace && !toPlace,
-      // setOldRemoteMoveIsPlace: (setOldRemoteMove &&
-      // remoteMoveObj?.toPlace) as boolean,
       justMoved: !!justMoved,
       notJustMoved: !justMoved,
     },
@@ -157,9 +98,6 @@ function Piece({ type, posNum, setPieceUnderDrag }: PieceProps): JSX.Element {
   }
 
   const style = getStyle();
-  // if (Object.keys(style).length) {
-  //   console.log(JSON.stringify(style));
-  // }
   return <div className={clsNames} ref={attachRef} style={style} key={posNum}></div>;
 }
 

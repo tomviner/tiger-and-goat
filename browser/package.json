@@ -1,68 +1,38 @@
 {
-  "name": "browser",
+  "name": "tiger-and-goat-browser",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^5.12.0",
-    "@testing-library/react": "^11.2.7",
-    "@testing-library/user-event": "^12.8.3",
-    "@types/jest": "^26.0.23",
-    "@types/lodash": "^4.14.170",
-    "@types/node": "^12.20.13",
-    "@types/react": "^17.0.5",
-    "@types/react-dom": "^17.0.5",
-    "@typescript-eslint/eslint-plugin": "^4.23.0",
-    "@typescript-eslint/parser": "^4.23.0",
-    "apisauce": "^2.1.1",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^3.4.0",
-    "eslint-plugin-react": "^7.23.2",
-    "immutable": "^4.0.0-rc.12",
-    "jest-mock-random": "^1.1.1",
-    "lodash": "^4.17.21",
-    "react": "^17.0.2",
-    "react-dnd": "^14.0.2",
-    "react-dnd-html5-backend": "^14.0.0",
-    "react-dom": "^17.0.2",
-    "react-scripts": "4.0.3",
-    "recoil": "^0.3.1",
-    "typescript": "^4.2.4",
-    "web-vitals": "^1.1.2"
+  "type": "module",
+  "engines": {
+    "node": ">=20.19"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "format": "npm run prettify -- --write",
-    "lint": "eslint ./src --ignore-path .gitignore --fix",
-    "lint:css": "stylelint \"src/**/*.css\"",
-    "prettify": "prettier \"src/**/*.{js,ts,tsx}\"",
-    "prettier-watch": "onchange 'src/**/*.{js,ts,tsx}' -- prettier --write {{changed}}"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write \"src/**/*.{js,ts,tsx,css}\"",
+    "format:check": "prettier --check \"src/**/*.{js,ts,tsx,css}\""
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "dependencies": {
+    "apisauce": "^2.1.6",
+    "immutable": "^4.3.7",
+    "react": "^18.3.1",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "^18.3.1",
+    "recoil": "^0.7.7"
   },
   "devDependencies": {
-    "eslint": "^7.26.0",
-    "onchange": "^7.1.0",
-    "prettier": "^2.3.0",
-    "prettier-plugin-organize-imports": "^2.1.0",
-    "stylelint": "^13.13.1"
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^26.0.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
+    "vitest": "^3.0.5"
   }
 }

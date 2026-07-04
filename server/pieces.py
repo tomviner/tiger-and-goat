@@ -1,6 +1,6 @@
 from collections.abc import MutableMapping
 
-from constants import GOAT_CHAR, TIGER_CHAR
+from .constants import GOAT_CHAR, TIGER_CHAR
 
 
 class Pieces(MutableMapping):

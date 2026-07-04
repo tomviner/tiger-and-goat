@@ -1,15 +1,25 @@
 .square {
-    position: relative;
+  position: relative;
 }
 
 .visibleSquare {
-    border: 2px solid black;
+  border: 2px solid black;
 }
 
 .diagBackward {
-    background: linear-gradient(to top right, #fff calc(50% - 2px), #000, #fff calc(50% + 2px) )
+  background: linear-gradient(
+    to top right,
+    #fff calc(50% - 2px),
+    #000,
+    #fff calc(50% + 2px)
+  );
 }
 
 .diagForward {
-    background: linear-gradient(to top left, #fff calc(50% - 2px), #000, #fff calc(50% + 2px) )
+  background: linear-gradient(
+    to top left,
+    #fff calc(50% - 2px),
+    #000,
+    #fff calc(50% + 2px)
+  );
 }

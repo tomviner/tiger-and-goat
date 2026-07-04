@@ -23,32 +23,27 @@ Note about pos nums, jumps from src to dest consist of pos nums deltas:
 - (and the reverse of each)
 in all cases the eaten is the average of of src & dest pos nums
 """
+
 import re
-
-from funcy import joining, post_processing
-
 
 ALL_POS_NUMS = set(range(25))
 
 
-@post_processing(tuple)
 def notation_to_coords(notation):
     """
     Placement: A1
     Step: A1-A2
     Jump: A1-A2-A3
     """
-    for notation in re.split(r'[- ]+', notation):
-        col, row = notation
-        yield 'ABCDE'.index(col.upper()), int(row) - 1
+    positions = re.split(r"[- ]+", notation)
+    return tuple(
+        ("ABCDE".index(position[0].upper()), int(position[1]) - 1)
+        for position in positions
+    )
 
 
-@joining('-')
 def coords_to_notation(coords):
-    for x, y in coords:
-        col = 'ABCDE'[x]
-        row = y + 1
-        yield f'{col}{row}'
+    return "-".join(f"{'ABCDE'[x]}{y + 1}" for x, y in coords)
 
 
 def coord_to_pos_num(coord):
@@ -61,16 +56,12 @@ def pos_num_to_coord(pos_num):
     return x, y
 
 
-@post_processing(tuple)
 def pos_nums_to_coords(pos_nums):
-    for pos_num in pos_nums:
-        yield pos_num_to_coord(pos_num)
+    return tuple(pos_num_to_coord(pos_num) for pos_num in pos_nums)
 
 
-@post_processing(tuple)
 def coords_to_pos_num(coords):
-    for coord in coords:
-        yield coord_to_pos_num(coord)
+    return tuple(coord_to_pos_num(coord) for coord in coords)
 
 
 def pos_num_to_notation(pos_num):
