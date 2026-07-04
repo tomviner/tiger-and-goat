@@ -14,7 +14,22 @@
 }
 
 .controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 6px 0;
+}
+
+.sidePicker {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 4px;
+}
+
+.swapButton {
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 2px 8px;
+  cursor: pointer;
 }

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { getData, postData } from './api';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { Controller, getData, getOpponents, OpponentsInfo, postData } from './api';
 import './board.css';
 import GoatsEaten from './GoatsEaten';
 import GoatsToPlace from './GoatsToPlace';
 import Square from './Square';
 import {
+  controllersState,
   playersTurnState,
   resultState,
   stateOfGameState,
@@ -15,47 +16,137 @@ import {
 } from './State';
 import { range2d } from './utils';
 
+type SideKey = 'goat' | 'tiger';
+
 function Board(): JSX.Element {
   const setUpdatedGame = useSetRecoilState(updatedGameState);
   const stateOfGame = useRecoilValue(stateOfGameState);
   const playersTurn = useRecoilValue(playersTurnState);
   const result = useRecoilValue(resultState);
-  const [autoPlay, setAutoPlay] = useState(false);
+  const [controllers, setControllers] = useRecoilState(controllersState);
+  const [opponents, setOpponents] = useState<OpponentsInfo | null>(null);
 
   useEffect(() => {
-    const res = getData();
-    res.then(setUpdatedGame).catch(console.error);
+    getData().then(setUpdatedGame).catch(console.error);
+    getOpponents().then(setOpponents).catch(console.error);
   }, []);
 
-  const swap = () => {
-    const res = postData(stateOfGame, null);
-    res.then(setUpdatedGame).catch(console.error);
-  };
+  // Auto-advance: whenever the side to move is engine-controlled (AI or a
+  // strategy), ask the server for its move. This drives human-vs-engine,
+  // engine-vs-engine, and strategy-vs-strategy alike, and stops at game over.
+  const turnSide: SideKey = playersTurn.playerNum === 1 ? 'goat' : 'tiger';
+  const engineToMove = controllers[turnSide].type !== 'human';
 
-  // Auto (AI vs AI): after each position settles, play the next ply for the
-  // side to move. Stops once the game is over so we don't loop on a finished
-  // board.
   useEffect(() => {
-    if (!autoPlay || result || !stateOfGame.history.size) {
+    if (!engineToMove || result || !stateOfGame.history.size) {
       return;
     }
-    const timer = setTimeout(swap, 600);
+    const timer = setTimeout(() => {
+      postData(stateOfGame, null, controllers)
+        .then(setUpdatedGame)
+        .catch(console.error);
+    }, 600);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoPlay, result, stateOfGame]);
+  }, [engineToMove, result, stateOfGame]);
+
+  const depthOptions = opponents
+    ? Array.from(
+        { length: opponents.depth.max - opponents.depth.min + 1 },
+        (_, i) => opponents.depth.min + i,
+      )
+    : [];
+
+  const setController = (side: SideKey, controller: Controller) =>
+    setControllers({ ...controllers, [side]: controller });
+
+  // Swap the two sides' controllers. A strategy is side-specific, so if one
+  // lands on the wrong side it falls back to the AI.
+  const swapSides = () => {
+    const onSide = (controller: Controller, side: SideKey): Controller => {
+      if (controller.type === 'strategy') {
+        const valid = (opponents?.strategies ?? []).some(
+          (s) => s.sideName === side && s.name === controller.name,
+        );
+        if (!valid) {
+          return { type: 'ai', depth: opponents?.depth.default ?? 6 };
+        }
+      }
+      return controller;
+    };
+    setControllers({
+      goat: onSide(controllers.tiger, 'goat'),
+      tiger: onSide(controllers.goat, 'tiger'),
+    });
+  };
+
+  const renderSide = (side: SideKey, label: string) => {
+    const controller = controllers[side];
+    const strategies = (opponents?.strategies ?? []).filter((s) => s.sideName === side);
+    const value =
+      controller.type === 'human'
+        ? 'human'
+        : controller.type === 'ai'
+          ? 'ai'
+          : controller.name;
+
+    const onSelect = (selected: string) => {
+      if (selected === 'human') {
+        setController(side, { type: 'human' });
+      } else if (selected === 'ai') {
+        setController(side, { type: 'ai', depth: opponents?.depth.default ?? 6 });
+      } else {
+        setController(side, { type: 'strategy', name: selected });
+      }
+    };
+
+    return (
+      <label className="sidePicker">
+        {label}:{' '}
+        <select value={value} onChange={(e) => onSelect(e.target.value)}>
+          <option value="human">Human</option>
+          <option value="ai">AI (Negamax)</option>
+          {strategies.map((s) => (
+            <option key={s.name} value={s.name} title={s.description}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+        {controller.type === 'ai' && depthOptions.length > 0 && (
+          <>
+            {' '}
+            depth{' '}
+            <select
+              value={controller.depth}
+              onChange={(e) =>
+                setController(side, { type: 'ai', depth: Number(e.target.value) })
+              }
+            >
+              {depthOptions.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
+      </label>
+    );
+  };
 
   return (
     <>
       <DndProvider backend={HTML5Backend}>
         <div className="result">{result}</div>
         <div className="controls">
-          <span>
-            Turn: <b>{playersTurn.name}</b>
-          </span>
-          <button onClick={swap}>Swap</button>
-          <button onClick={() => setAutoPlay((on) => !on)}>
-            {autoPlay ? 'Stop auto' : 'Auto (AI vs AI)'}
+          {renderSide('goat', 'Goat')}
+          <button className="swapButton" onClick={swapSides} title="Swap sides">
+            ⇄
           </button>
+          {renderSide('tiger', 'Tiger')}
+        </div>
+        <div className="controls">
+          Turn: <b>{playersTurn.name}</b>
         </div>
         <GoatsToPlace />
         <div className={'gameBoard'}>

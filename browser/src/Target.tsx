@@ -6,6 +6,7 @@ import { postData } from './api';
 import { ItemTypes } from './Constants';
 import { Move } from './move';
 import {
+  controllersState,
   goatsState,
   historyState,
   numGoatsToPlaceState,
@@ -39,6 +40,9 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
   const history = useRecoilValue(historyState);
   const numGoatsToPlace = useRecoilValue(numGoatsToPlaceState);
   const [previousRemoteMove, setPreviousRemoteMove] = useRecoilState(remoteMoveState);
+  const controllers = useRecoilValue(controllersState);
+  const turnSide = playersTurn.playerNum === 1 ? 'goat' : 'tiger';
+  const humanToMove = controllers[turnSide].type === 'human';
 
   const canMove = (
     itemType: string | symbol | null,
@@ -53,7 +57,9 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
     }
     const correctTurn = itemType === playersTurn.type;
     const targetFree = !tigers.union(goats).includes(toPosNum);
-    return correctTurn && targetFree && possibleMoves.includes(move.toList());
+    return (
+      humanToMove && correctTurn && targetFree && possibleMoves.includes(move.toList())
+    );
   };
 
   const doMove: (
@@ -86,7 +92,7 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
     });
 
     // request remote response move
-    const res = postData(stateOfGame, move.toList());
+    const res = postData(stateOfGame, move.toList(), controllers);
     // apply remote move
     res.then(setUpdatedGame).catch((error) => {
       console.error(error);
