@@ -1,0 +1,7 @@
+name: tigergoat
+runtime:
+  name: python
+  options:
+    toolchain: uv
+    virtualenv: .venv
+description: Cloudflare DNS + Pages custom domain for tigergoat.tomv.uk

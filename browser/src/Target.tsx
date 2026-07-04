@@ -1,7 +1,7 @@
 import { Set } from 'immutable';
 import React from 'react';
 import { useDrop } from 'react-dnd';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { ItemTypes } from './Constants';
 import { sendMove } from './gameSource';
 import { Move } from './move';
@@ -10,10 +10,13 @@ import {
   engineModeState,
   goatsState,
   historyState,
+  lastEatenSquareState,
+  moveLogState,
   numGoatsToPlaceState,
   playersTurnState,
   possibleMovesState,
   remoteMoveState,
+  resultState,
   stateOfGameState,
   tigersState,
   updatedGameState,
@@ -40,11 +43,14 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
   const stateOfGame = useRecoilValue(stateOfGameState);
   const history = useRecoilValue(historyState);
   const numGoatsToPlace = useRecoilValue(numGoatsToPlaceState);
-  const [previousRemoteMove, setPreviousRemoteMove] = useRecoilState(remoteMoveState);
+  const [previousRemoteMove] = useRecoilState(remoteMoveState);
+  const setLastEatenSquare = useSetRecoilState(lastEatenSquareState);
+  const setMoveLog = useSetRecoilState(moveLogState);
   const controllers = useRecoilValue(controllersState);
   const mode = useRecoilValue(engineModeState);
+  const result = useRecoilValue(resultState);
   const turnSide = playersTurn.playerNum === 1 ? 'goat' : 'tiger';
-  const humanToMove = controllers[turnSide].type === 'human';
+  const humanToMove = controllers[turnSide].type === 'human' && !result;
 
   const canMove = (
     itemType: string | symbol | null,
@@ -72,9 +78,9 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
     const fromPosNum = item.fromPosNum;
     const move = new Move(item.toPlace, fromPosNum, toPosNum);
 
-    // this doesn't work, as it gets overridden below
-    if (move?.eaten) {
-      setPreviousRemoteMove(move.toList());
+    // A human capture (hotseat tiger) animates the eaten goat to the pile.
+    if (move.eaten !== null) {
+      setLastEatenSquare(move.eaten);
     }
 
     const newPlayerNum = playersTurn.otherPlayerNum;
@@ -93,14 +99,26 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
       remoteMove: previousRemoteMove,
     });
 
+    // record the human move (the engine reply is recorded on the response)
+    setMoveLog((log) => [...log, move.toList().toArray()]);
+
     // request remote response move
     const res = sendMove(mode, stateOfGame, move.toList(), controllers);
     // apply remote move
-    res.then(setUpdatedGame).catch((error) => {
-      console.error(error);
-      // error with fetching and applying remote move, revert local move
-      setUpdatedGame(updatedGame);
-    });
+    res
+      .then((updated) => {
+        const remoteMove = updated.remoteMove;
+        if (remoteMove) {
+          setMoveLog((log) => [...log, remoteMove.toArray()]);
+        }
+        setUpdatedGame(updated);
+      })
+      .catch((error) => {
+        console.error(error);
+        // error with fetching and applying remote move, revert local move
+        setMoveLog((log) => log.slice(0, -1));
+        setUpdatedGame(updatedGame);
+      });
   };
 
   const [{ isOver, canDrop, isUnderSelf }, drop] = useDrop(
@@ -115,7 +133,10 @@ function Target({ posNum, pieceUnderDrag }: TargetProps): JSX.Element {
         isUnderSelf: (monitor.getItem() as ItemType)?.fromPosNum == posNum,
       }),
     }),
-    [posNum, playersTurn, history],
+    // controllers, mode and result must be here: the drop handler reads them
+    // (e.g. whether the side to move is Human, and whether the game is over),
+    // and they can change between moves.
+    [posNum, playersTurn, history, controllers, mode, result],
   );
 
   const targetClsNames = getClsNames(

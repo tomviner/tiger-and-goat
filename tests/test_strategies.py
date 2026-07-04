@@ -64,6 +64,20 @@ def test_play_game_is_deterministic():
     assert play_game(goat, tiger, 5) == play_game(goat, tiger, 5)
 
 
+def test_elo_tournament_includes_ai_and_rates_everyone():
+    from server.elo_tournament import run_elo_tournament
+
+    data = run_elo_tournament(games=2, depths=[1, 2])
+    # 6 goat strategies + 2 AI depths; 5 tiger strategies + 2 AI depths
+    assert len(data["goat"]) == len(GOAT_STRATEGIES) + 2
+    assert len(data["tiger"]) == len(TIGER_STRATEGIES) + 2
+    assert any(r["kind"] == "ai" and r["depth"] == 2 for r in data["goat"])
+    for side in ("goat", "tiger"):
+        elos = [r["elo"] for r in data[side]]
+        assert elos == sorted(elos, reverse=True)  # sorted strongest first
+        assert all(isinstance(r["elo"], int) for r in data[side])
+
+
 def test_run_tournament_ranks_all_strategies():
     matches, goat_ranking, tiger_ranking = run_tournament(games=2)
 

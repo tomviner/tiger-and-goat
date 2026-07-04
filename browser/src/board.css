@@ -4,7 +4,49 @@
   grid-template-rows: repeat(5, 100px);
 
   justify-content: center;
+  position: relative;
+  /* top padding leaves room for the pieces' upward overhang; left padding makes
+     room for the rank labels (and absorbs the leftward piece overhang). */
   padding-top: 50px;
+  padding-left: 26px;
+}
+
+/* A1..E5 coordinate labels, positioned in the board's padding so they scale
+   with the board and don't disturb the piece-positioning maths. The nodes sit
+   at the grid-line intersections (cell corners, where the pieces are), so each
+   100px label is shifted by half a cell to centre on its node column/row
+   rather than on the cell. */
+.fileLabels {
+  position: absolute;
+  top: 14px;
+  left: -24px; /* 26px (grid left) - 50px (half a cell) */
+  display: flex;
+  pointer-events: none;
+  color: #888;
+  font-size: 14px;
+}
+
+.fileLabels span {
+  width: 100px;
+  text-align: center;
+}
+
+.rankLabels {
+  position: absolute;
+  top: 0; /* 50px (grid top) - 50px (half a cell) */
+  left: 2px;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  color: #888;
+  font-size: 14px;
+}
+
+.rankLabels span {
+  height: 100px;
+  width: 20px;
+  line-height: 100px;
+  text-align: center;
 }
 
 .result {
@@ -15,16 +57,76 @@
 
 .controls {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 16px;
-  margin: 6px 0;
+  gap: 8px 12px;
+  margin: 6px auto;
+  padding: 0 8px;
+  max-width: 500px;
 }
 
 .sidePicker {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 4px;
+}
+
+/* The board is a fixed 500px (5 x 100px cells with hard-coded piece offsets).
+   On narrow screens scale the whole board down to fit so the page no longer
+   overflows the viewport. Scaling the board scales the pieces with it, so the
+   positioning maths is preserved. */
+.boardArea {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.gameOverOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.gameOverText {
+  font-size: 30px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #c4661a;
+  text-align: center;
+  padding: 0 12px;
+}
+
+.newGameButton {
+  font-size: 16px;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #f6821f;
+  color: #fff;
+  cursor: pointer;
+}
+
+@media (max-width: 560px) {
+  /* Scale the board (now 526px wide incl. the label padding) to fit. The left
+     padding absorbs the leftward piece overhang, so 540px leaves a small
+     margin. min(1, ...) avoids upscaling near the breakpoint. */
+  .gameBoard {
+    transform: scale(min(1, calc((100vw - 20px) / 540px)));
+    transform-origin: top center;
+  }
+  .boardArea {
+    /* reserve the scaled board height (board box is 550px tall incl. padding) */
+    height: min(550px, calc(1.02 * (100vw - 20px)));
+  }
 }
 
 .swapButton {

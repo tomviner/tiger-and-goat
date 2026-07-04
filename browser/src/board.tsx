@@ -4,6 +4,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { Controller, OpponentsInfo } from './api';
 import './board.css';
+import Debug from './Debug';
 import { fetchOpponents, fetchStart, sendMove } from './gameSource';
 import GoatsEaten from './GoatsEaten';
 import GoatsToPlace from './GoatsToPlace';
@@ -11,6 +12,7 @@ import Square from './Square';
 import {
   controllersState,
   engineModeState,
+  moveLogState,
   playersTurnState,
   resultState,
   stateOfGameState,
@@ -28,10 +30,16 @@ function Board(): JSX.Element {
   const [controllers, setControllers] = useRecoilState(controllersState);
   const [opponents, setOpponents] = useState<OpponentsInfo | null>(null);
   const [mode, setMode] = useRecoilState(engineModeState);
+  const setMoveLog = useSetRecoilState(moveLogState);
 
   // (Re)start a game whenever the engine mode changes.
-  useEffect(() => {
+  const newGame = () => {
+    setMoveLog([]);
     fetchStart(mode).then(setUpdatedGame).catch(console.error);
+  };
+
+  useEffect(() => {
+    newGame();
     fetchOpponents(mode).then(setOpponents).catch(console.error);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
@@ -48,12 +56,18 @@ function Board(): JSX.Element {
     }
     const timer = setTimeout(() => {
       sendMove(mode, stateOfGame, null, controllers)
-        .then(setUpdatedGame)
+        .then((updated) => {
+          const remoteMove = updated.remoteMove;
+          if (remoteMove) {
+            setMoveLog((log) => [...log, remoteMove.toArray()]);
+          }
+          setUpdatedGame(updated);
+        })
         .catch(console.error);
     }, 600);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [engineToMove, result, stateOfGame]);
+  }, [engineToMove, result, stateOfGame, controllers, mode]);
 
   const depthOptions = opponents
     ? Array.from(
@@ -164,15 +178,36 @@ function Board(): JSX.Element {
           </label>
         </div>
         <GoatsToPlace />
-        <div className={'gameBoard'}>
-          {range2d(5, 5)
-            .toJS()
-            .map(([x, y]) => {
-              return <Square key={`${x},${y}`} x={x} y={y} />;
-            })}
+        <div className="boardArea">
+          <div className={'gameBoard'}>
+            <div className="fileLabels">
+              {['A', 'B', 'C', 'D', 'E'].map((f) => (
+                <span key={f}>{f}</span>
+              ))}
+            </div>
+            <div className="rankLabels">
+              {[1, 2, 3, 4, 5].map((r) => (
+                <span key={r}>{r}</span>
+              ))}
+            </div>
+            {range2d(5, 5)
+              .toJS()
+              .map(([x, y]) => {
+                return <Square key={`${x},${y}`} x={x} y={y} />;
+              })}
+          </div>
+          {result ? (
+            <div className="gameOverOverlay">
+              <div className="gameOverText">{result}</div>
+              <button className="newGameButton" onClick={newGame}>
+                New game
+              </button>
+            </div>
+          ) : null}
         </div>
       </DndProvider>
       <GoatsEaten />
+      <Debug />
     </>
   );
 }

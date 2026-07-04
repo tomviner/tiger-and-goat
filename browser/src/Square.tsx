@@ -52,7 +52,6 @@ function Square({ x, y }: SquareProps): JSX.Element {
     <div className={squareClsNames} key={posNum}>
       <Target key={`Ta${posNum}`} posNum={posNum} pieceUnderDrag={pieceUnderDrag} />
       {getPiece(tigers.includes(posNum), goats.includes(posNum))}
-      {posNum}
     </div>
   );
 }

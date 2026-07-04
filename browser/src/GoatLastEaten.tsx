@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import './GoatsEaten.css';
-import { Move } from './move';
-import { remoteMoveState } from './State';
+import { lastEatenSquareState } from './State';
 import { divmod, getClsNames } from './utils';
 
 export interface GoatLastEatenProps {
@@ -15,18 +14,22 @@ function GoatLastEaten({ numGoatsEaten }: GoatLastEatenProps): JSX.Element {
     numGoatsEaten = 0;
   }
 
-  const [remoteMoveApplied, setRemoteMoveApplied] = useState(false);
+  const eatenSquare = useRecoilValue(lastEatenSquareState);
 
-  const remoteMove = useRecoilValue(remoteMoveState);
+  // Render once at the captured square, then settle into the eaten pile; the
+  // CSS transition glides between the two. GoatsEaten remounts this per capture
+  // (key=numGoatsEaten), so each eaten goat animates once, from whichever side
+  // captured it (AI or a human in hotseat).
+  const [settled, setSettled] = useState(false);
+  const animateFromBoard = eatenSquare !== null && !settled;
 
-  const remoteMoveObj = remoteMove ? Move.fromList(remoteMove) : null;
-
-  const justEaten = remoteMoveObj?.eaten !== null;
-  const applyMove = justEaten && !remoteMoveApplied;
+  useEffect(() => {
+    setSettled(true);
+  }, []);
 
   const getStyle = () => {
-    if (applyMove) {
-      const [oldY, oldX] = divmod(remoteMoveObj?.eaten as number, 5);
+    if (animateFromBoard && eatenSquare !== null) {
+      const [oldY, oldX] = divmod(eatenSquare, 5);
       return {
         left: `${(oldX - 2) * 100 - 35}px`,
         bottom: `${(5 - oldY) * 100 + 35}px`,
@@ -37,11 +40,7 @@ function GoatLastEaten({ numGoatsEaten }: GoatLastEatenProps): JSX.Element {
     };
   };
 
-  useEffect(() => {
-    setRemoteMoveApplied(justEaten);
-  }, [justEaten]);
-
-  const clsNames = getClsNames({ applyMove }, 'goatLastEaten');
+  const clsNames = getClsNames({ applyMove: animateFromBoard }, 'goatLastEaten');
 
   return (
     <div className="goatLastEatenWrapper">

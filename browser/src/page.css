@@ -1,0 +1,129 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+  text-align: left;
+  line-height: 1.6;
+}
+
+.page h1 {
+  font-size: 26px;
+  margin-bottom: 4px;
+}
+
+.page h2 {
+  font-size: 19px;
+  margin-top: 28px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 4px;
+}
+
+.page code {
+  background: #f3f3f3;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.9em;
+}
+
+.page a {
+  color: #c4661a;
+}
+
+.ladder {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+.ladder th,
+.ladder td {
+  text-align: left;
+  padding: 7px 9px;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+
+.ladder th {
+  color: #777;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ladder .elo {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ladder .wdl {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: #555;
+}
+
+.ladder .desc {
+  color: #444;
+}
+
+.ladder tr.aiRow {
+  background: #fff7ee;
+}
+
+.ladder tr.aiRow code {
+  background: #f6821f;
+  color: #fff;
+}
+
+.heatmap {
+  margin: 14px 0 6px;
+}
+
+.heatmap .heatmapTopAxis {
+  font-size: 12px;
+  color: #777;
+  margin-left: 28px;
+  margin-bottom: 4px;
+}
+
+.heatmap table {
+  border-collapse: collapse;
+}
+
+.heatmap th {
+  font-size: 12px;
+  color: #777;
+  padding: 2px 6px;
+  text-align: center;
+}
+
+.heatmap th.corner {
+  width: 24px;
+}
+
+.heatmap td.cell {
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1205;
+  border: 1px solid #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.heatmap td.cell.diag {
+  outline: 2px solid #222;
+  outline-offset: -2px;
+}
+
+.heatmap .heatmapLegend {
+  font-size: 12px;
+  color: #777;
+  margin-top: 6px;
+}
+
+.heatmap .heatmapLeftAxis {
+  font-weight: 600;
+  margin-right: 8px;
+}

@@ -62,6 +62,21 @@ export function localStart(): RawUpdatedGame {
   return asRaw(newGame(), null);
 }
 
+// Recompute a position's possible moves / result without playing a move — used
+// to load and inspect an arbitrary board (the debug panel).
+export function localDescribe(stateOfGame: {
+  playerNum: number;
+  numGoatsToPlace: number;
+  history: number[][][];
+}): RawUpdatedGame {
+  const state = stateFromHistory(
+    stateOfGame.playerNum,
+    stateOfGame.numGoatsToPlace,
+    stateOfGame.history,
+  );
+  return asRaw(state, null);
+}
+
 export function localMove(
   stateOfGame: { playerNum: number; numGoatsToPlace: number; history: number[][][] },
   move: number[] | null,

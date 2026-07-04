@@ -10,10 +10,20 @@ import {
   parseUpdatedGame,
   postData,
 } from './api';
-import { localMove, localOpponents, localStart } from './engine/local';
+import { localDescribe, localMove, localOpponents, localStart } from './engine/local';
 import { EngineMode, StateOfGameType, UpdatedGameType } from './State';
 
 export type { EngineMode };
+
+// Inspect an arbitrary state (no move played). Always uses the local engine —
+// it's a pure recompute, so it works regardless of the selected mode.
+export function describeState(stateOfGame: {
+  playerNum: number;
+  numGoatsToPlace: number;
+  history: number[][][];
+}): UpdatedGameType {
+  return parseUpdatedGame(localDescribe(stateOfGame));
+}
 
 export function fetchStart(mode: EngineMode): Promise<UpdatedGameType> {
   if (mode === 'local') {

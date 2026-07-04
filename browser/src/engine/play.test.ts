@@ -2,9 +2,11 @@ import { describe, expect, test } from 'vitest';
 import {
   GOAT_PLAYER,
   isOver,
+  isThreefold,
   makeMove,
   newGame,
   possibleMoves,
+  resultName,
   stateFromHistory,
 } from './game';
 import { localMove, localOpponents, localStart } from './local';
@@ -29,6 +31,109 @@ describe('strategies only ever play legal moves', () => {
         }
       });
     });
+  });
+});
+
+describe('repetition is a threefold draw, not a forced loss', () => {
+  // A user reported this as a wrong "goat wins": three tigers boxed in and the
+  // fourth's only move (A2->A3) recreated a recent board. The old rule banned
+  // the move, leaving no legal tiger move -> goats win. Under threefold rules
+  // the move is legal and the game heads for a draw, not a goat win.
+  const history = [
+    [
+      [12, 17, 20, 24],
+      [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 19, 21, 22, 23],
+    ],
+    [
+      [12, 17, 20, 24],
+      [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 19, 21, 22, 23],
+    ],
+    [
+      [12, 18, 20, 24],
+      [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 19, 21, 22, 23],
+    ],
+    [
+      [12, 18, 20, 24],
+      [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16, 19, 21, 22, 23],
+    ],
+    [
+      [17, 18, 20, 24],
+      [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16, 19, 21, 22, 23],
+    ],
+    [
+      [17, 18, 20, 24],
+      [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 19, 21, 22, 23],
+    ],
+    [
+      [12, 17, 18, 24],
+      [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 14, 15, 19, 21, 22, 23],
+    ],
+    [
+      [12, 17, 18, 24],
+      [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 19, 21, 22, 23],
+    ],
+    [
+      [12, 16, 18, 24],
+      [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 19, 21, 22, 23],
+    ],
+    [
+      [12, 16, 18, 24],
+      [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 14, 15, 19, 21, 22, 23],
+    ],
+    [
+      [16, 17, 18, 24],
+      [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 14, 15, 19, 21, 22, 23],
+    ],
+    [
+      [16, 17, 18, 24],
+      [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 12, 13, 14, 15, 19, 21, 22, 23],
+    ],
+    [
+      [11, 17, 18, 24],
+      [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 12, 13, 14, 15, 19, 21, 22, 23],
+    ],
+    [
+      [11, 17, 18, 24],
+      [0, 1, 2, 3, 4, 6, 7, 8, 9, 12, 13, 14, 15, 16, 19, 21, 22, 23],
+    ],
+    [
+      [10, 17, 18, 24],
+      [0, 1, 2, 3, 4, 6, 7, 8, 9, 12, 13, 14, 15, 16, 19, 21, 22, 23],
+    ],
+    [
+      [10, 17, 18, 24],
+      [0, 1, 2, 3, 4, 6, 7, 8, 9, 12, 13, 14, 15, 16, 19, 20, 22, 23],
+    ],
+    [
+      [5, 17, 18, 24],
+      [0, 1, 2, 3, 4, 6, 7, 8, 9, 12, 13, 14, 15, 16, 19, 20, 22, 23],
+    ],
+    [
+      [5, 17, 18, 24],
+      [0, 1, 2, 3, 4, 6, 7, 8, 9, 12, 13, 14, 15, 16, 19, 21, 22, 23],
+    ],
+  ];
+
+  test('the tiger can still move (not a goat win)', () => {
+    const state = stateFromHistory(2, 0, history);
+    expect(resultName(state)).not.toBe('goat wins');
+    expect(isOver(state)).toBe(false);
+    expect(possibleMoves(state)).toContainEqual([5, 10]); // A2 -> A3 is legal
+  });
+
+  test('a position occurring three times (same side to move) is threefold', () => {
+    const p: number[][] = [
+      [0, 4, 20, 24],
+      [6, 8, 16, 18],
+    ];
+    const q: number[][] = [
+      [0, 4, 20, 24],
+      [6, 8, 16, 17],
+    ];
+    // p sits at indices 0, 2, 4 — every second entry, so same side to move.
+    expect(isThreefold(stateFromHistory(1, 0, [p, q, p, q, p]))).toBe(true);
+    // only two occurrences is not yet a draw
+    expect(isThreefold(stateFromHistory(1, 0, [p, q, p]))).toBe(false);
   });
 });
 
@@ -114,8 +219,12 @@ describe('local API mirrors the server', () => {
       );
       plies += 1;
     }
-    expect(['tiger wins', 'goat wins', "draw (as goat can't move)", '']).toContain(
-      data.result,
-    );
+    expect([
+      'tiger wins',
+      'goat wins',
+      "draw (as goat can't move)",
+      'draw (threefold repetition)',
+      '',
+    ]).toContain(data.result);
   });
 });

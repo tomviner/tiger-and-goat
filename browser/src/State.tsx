@@ -43,6 +43,21 @@ export const resultState = atom({
   default: '',
 });
 
+// Every move played this game, in order (goat moves first, then alternating),
+// for the debug move list. Each move is [place], [from, to] or [from, eaten, to].
+export const moveLogState = atom<number[][]>({
+  key: 'moveLogState',
+  default: [],
+});
+
+// The board square a goat was last captured from, used to animate it flying to
+// the eaten pile. Set for any capture — by the AI/strategy (a remote move) or
+// by a human (in hotseat) — so the animation works regardless of who jumped.
+export const lastEatenSquareState = atom<number | null>({
+  key: 'lastEatenSquareState',
+  default: null,
+});
+
 export const historyState = atom<List<List<Set<number>>>>({
   key: 'historyState',
   default: List() as List<List<Set<number>>>,
@@ -139,6 +154,12 @@ export const updatedGameState = selector<UpdatedGameType>({
       set(possibleMovesState, possibleMoves);
       set(resultState, result);
       set(remoteMoveState, remoteMove);
+      // A remote capture (jump) is a 3-element move [src, eaten, dest]; record
+      // the eaten square so the goat animates to the eaten pile. Only set on a
+      // capture so a human capture's value (set in doMove) isn't cleared.
+      if (remoteMove && remoteMove.size === 3) {
+        set(lastEatenSquareState, remoteMove.get(1) as number);
+      }
     }
   },
 });

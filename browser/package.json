@@ -12,7 +12,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "format": "prettier --write \"src/**/*.{js,ts,tsx,css}\"",
-    "format:check": "prettier --check \"src/**/*.{js,ts,tsx,css}\""
+    "format:check": "prettier --check \"src/**/*.{js,ts,tsx,css}\"",
+    "build:static": "VITE_ENGINE=local npm run build",
+    "deploy": "npm run build:static && wrangler pages deploy dist --project-name tigergoat --branch main"
   },
   "dependencies": {
     "apisauce": "^2.1.6",
@@ -21,6 +23,7 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.4",
     "recoil": "^0.7.7"
   },
   "devDependencies": {
@@ -33,6 +36,7 @@
     "prettier": "^3.4.2",
     "typescript": "^5.7.3",
     "vite": "^6.1.0",
-    "vitest": "^3.0.5"
+    "vitest": "^3.0.5",
+    "wrangler": "^4.103.0"
   }
 }
