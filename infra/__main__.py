@@ -43,8 +43,8 @@ domain = cloudflare.PagesDomain(
     opts=pulumi.ResourceOptions(depends_on=[record]),
 )
 
-# 🐅🐐.tomv.uk -> the same Pages project. Cloudflare's API and DNS use
-# the ASCII/Punycode form; browsers translate the Unicode label automatically.
+# 🐅🐐.tomv.uk -> the same Pages project, whose app redirects to the canonical
+# hostname. Cloudflare's API and DNS use the ASCII/Punycode form.
 symbol_record = cloudflare.Record(
     "symbol-pages-cname",
     zone_id=zone.zone_id,

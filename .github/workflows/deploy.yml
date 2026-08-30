@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [main, codex/deploy-cloudflare]
   workflow_dispatch:
 
 jobs:
