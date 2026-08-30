@@ -49,7 +49,8 @@ The contents of `browser/dist/` are then a complete, backend-free game.
 ## Deployment
 
 The static build is hosted on **Cloudflare Pages** at
-<https://tigergoat.tomv.uk> (and <https://tigergoat.pages.dev>).
+<https://tigergoat.tomv.uk>, with the short symbol alias
+<https://🐅🐐.tomv.uk> (and <https://tigergoat.pages.dev>).
 
 Deploy the content (requires a wrangler login with `pages:write`):
 
@@ -62,8 +63,10 @@ project.
 
 DNS and the custom domain are managed with Pulumi in [`infra/`](infra/): it
 looks up the existing `tomv.uk` Cloudflare zone read-only, creates the
-`tigergoat.tomv.uk` CNAME, and attaches the custom domain to the Pages project.
-It needs a `CLOUDFLARE_API_TOKEN` with Zone:Read, DNS:Edit and Pages:Edit:
+`tigergoat.tomv.uk` and `xn--wn8hwa.tomv.uk` CNAMEs, and attaches both custom
+domains to the Pages project. The latter is the DNS/Punycode form of
+`🐅🐐.tomv.uk`. It needs a `CLOUDFLARE_API_TOKEN` with Zone:Read,
+DNS:Edit and Pages:Edit:
 
 ```console
 cd infra

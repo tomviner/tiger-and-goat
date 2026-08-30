@@ -3,4 +3,5 @@ config:
   tigergoat:cloudflareAccountId: c07b72a1d0977acc3547f48da02a5928
   tigergoat:zoneName: tomv.uk
   tigergoat:subdomain: tigergoat
+  tigergoat:symbolSubdomain: xn--wn8hwa
   tigergoat:pagesProject: tigergoat

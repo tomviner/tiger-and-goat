@@ -1,7 +1,7 @@
 [project]
 name = "tigergoat-infra"
 version = "0.1.0"
-description = "Cloudflare DNS + Pages custom domain for tigergoat.tomv.uk"
+description = "Cloudflare DNS + Pages custom domains for the Tigers & Goats site"
 requires-python = ">=3.12"
 dependencies = [
     "pulumi>=3,<4",
