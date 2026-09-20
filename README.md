@@ -53,7 +53,7 @@ requests and cannot select another model or submit an arbitrary prompt. The
 POST is not user-authenticated; Cloudflare authenticates the Function's AI
 binding internally, while same-origin and payload validation limit the public
 surface. Jev requests use Unified Billing through the dedicated
-`tigergoat-jev` AI Gateway. That gateway is limited to 10 requests per minute
+`tigergoat-jev` AI Gateway. That gateway is limited to 60 requests per minute
 and $1 per rolling 30 days. Auto-top-up is disabled. Cloudflare spend limits
 are eventually consistent, so a concurrent burst can exceed the dollar limit
 slightly before enforcement catches up; the finite prepaid balance is the

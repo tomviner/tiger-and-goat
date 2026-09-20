@@ -44,7 +44,17 @@ export async function getJevMove(
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ state, possibleMoves }),
   });
-  const data = (await response.json()) as JevMove | { error?: string };
+  const body = await response.text();
+  let data: JevMove | { error?: string };
+  try {
+    data = JSON.parse(body) as JevMove | { error?: string };
+  } catch {
+    throw new Error(
+      response.ok
+        ? 'Jev returned an invalid response'
+        : `Jev service unavailable (${response.status})`,
+    );
+  }
   if (!response.ok) {
     throw new Error(
       'error' in data && data.error ? data.error : `Jev failed (${response.status})`,
