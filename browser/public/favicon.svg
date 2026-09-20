@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Tiger</title>
+  <path d="M10 24 8 6l17 10M54 24 56 6 39 16" fill="#f58220" stroke="#171717" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M32 8C17 8 8 19 8 35c0 14 11 24 24 24s24-10 24-24C56 19 47 8 32 8Z" fill="#f58220" stroke="#171717" stroke-width="4"/>
+  <g fill="none" stroke="#171717" stroke-width="4" stroke-linecap="round">
+    <path d="M32 10v12M20 13l6 10M44 13l-6 10M10 29l12 4M54 29l-12 4"/>
+  </g>
+  <ellipse cx="22" cy="34" rx="4" ry="5" fill="#171717"/>
+  <ellipse cx="42" cy="34" rx="4" ry="5" fill="#171717"/>
+  <circle cx="27" cy="45" r="8" fill="#ffe0ad"/>
+  <circle cx="37" cy="45" r="8" fill="#ffe0ad"/>
+  <path d="m32 41-5 3 5 4 5-4Z" fill="#171717"/>
+  <path d="M32 48v5m0 0-5 3m5-3 5 3" fill="none" stroke="#171717" stroke-width="3" stroke-linecap="round"/>
+</svg>
