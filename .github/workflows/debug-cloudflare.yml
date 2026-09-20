@@ -1,7 +1,8 @@
 name: Debug Cloudflare runtime
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
 
 jobs:
   tail:
