@@ -6,7 +6,7 @@ server and a React client.
 ## Requirements
 
 - [uv](https://docs.astral.sh/uv/)
-- Node.js 20.19 or newer
+- Node.js 22 or newer
 
 ## Setup
 
@@ -50,9 +50,14 @@ Pages Function, which uses the `typesafe/jev` Workers AI model to choose among
 the moves calculated and validated by the local engine. No Cloudflare
 credential is sent to the browser. The endpoint rejects cross-origin browser
 requests and cannot select another model or submit an arbitrary prompt. The
-Cloudflare account remains on Workers Free, whose daily Workers AI allocation
-is a hard ceiling: exhausting it makes Jev turns fail until the UTC reset but
-does not create paid overage.
+POST is not user-authenticated; Cloudflare authenticates the Function's AI
+binding internally, while same-origin and payload validation limit the public
+surface. Jev requests use Unified Billing through the dedicated
+`tigergoat-jev` AI Gateway. That gateway is limited to 10 requests per minute
+and $1 per rolling 30 days. Auto-top-up is disabled. Cloudflare spend limits
+are eventually consistent, so a concurrent burst can exceed the dollar limit
+slightly before enforcement catches up; the finite prepaid balance is the
+account-level backstop.
 
 ## Deployment
 

@@ -10,7 +10,11 @@ interface JevRequest {
 }
 
 interface AiBinding {
-  run(model: string, input: unknown): Promise<unknown>;
+  run(
+    model: string,
+    input: unknown,
+    options?: { gateway: { id: string } },
+  ): Promise<unknown>;
 }
 
 interface FunctionContext {
@@ -155,7 +159,9 @@ export async function onRequestPost(context: FunctionContext): Promise<Response>
   }
 
   try {
-    const response = await context.env.AI.run('typesafe/jev', buildJevInput(body));
+    const response = await context.env.AI.run('typesafe/jev', buildJevInput(body), {
+      gateway: { id: 'tigergoat-jev' },
+    });
     return json(moveFromJevResponse(response, body.possibleMoves));
   } catch (error) {
     console.error('Jev inference failed', error);

@@ -91,7 +91,11 @@ describe('Jev move contract', () => {
       model: 'jev-1.13.0',
     });
     expect(calls).toHaveLength(1);
-    expect(calls[0][0]).toBe('typesafe/jev');
+    expect(calls[0]).toEqual([
+      'typesafe/jev',
+      buildJevInput(requestBody),
+      { gateway: { id: 'tigergoat-jev' } },
+    ]);
   });
 
   test('rejects malformed game payloads before spending an inference', async () => {
