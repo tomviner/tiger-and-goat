@@ -82,6 +82,8 @@ function Board(): JSX.Element {
       )
     : [];
 
+  const usesJev = controllers.goat.type === 'jev' || controllers.tiger.type === 'jev';
+
   const setController = (side: SideKey, controller: Controller) =>
     setControllers({ ...controllers, [side]: controller });
 
@@ -183,15 +185,20 @@ function Board(): JSX.Element {
         <div className="controls">
           Turn: <b>{playersTurn.name}</b>
           <label className="sidePicker">
-            Engine:{' '}
+            Rules engine:{' '}
             <select
               value={mode}
               onChange={(e) => setMode(e.target.value as typeof mode)}
             >
-              <option value="server">Server (Python)</option>
-              <option value="local">Local (in-browser)</option>
+              <option value="server">Python server (game rules)</option>
+              <option value="local">Browser (game rules)</option>
             </select>
           </label>
+          {usesJev ? (
+            <span>
+              Jev AI: <b>Cloudflare</b>
+            </span>
+          ) : null}
         </div>
         <GoatsToPlace />
         <div className="boardArea">
