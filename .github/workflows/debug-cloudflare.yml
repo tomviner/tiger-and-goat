@@ -28,9 +28,11 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          timeout 25s npx wrangler pages deployment tail \
+          deployment_url=$(npx wrangler pages deployment list \
             --project-name tigergoat \
             --environment production \
+            --json | jq -r '.[0].url')
+          timeout 25s npx wrangler pages deployment tail "$deployment_url" \
             --format pretty \
             --status error > /tmp/cloudflare-tail.log 2>&1 &
           tail_pid=$!
