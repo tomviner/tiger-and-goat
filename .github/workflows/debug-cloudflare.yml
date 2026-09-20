@@ -1,0 +1,43 @@
+name: Debug Cloudflare runtime
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tail:
+    name: Tail production Function and reproduce Jev request
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: browser
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: browser/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Capture runtime exception
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          timeout 25s npx wrangler pages deployment tail \
+            --project-name tigergoat \
+            --environment production \
+            --format pretty \
+            --status error > /tmp/cloudflare-tail.log 2>&1 &
+          tail_pid=$!
+          sleep 8
+          curl --silent --show-error https://tigergoat.tomv.uk/api/jev \
+            -H 'origin: https://tigergoat.tomv.uk' \
+            -H 'content-type: application/json' \
+            --data '{"state":{"playerNum":2,"numGoatsToPlace":19,"history":[[[0,4,20,24],[12]]]},"possibleMoves":[[0,1],[0,6],[4,3]]}' || true
+          sleep 8
+          wait "$tail_pid" || true
+          cat /tmp/cloudflare-tail.log
