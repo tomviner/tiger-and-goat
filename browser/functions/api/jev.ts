@@ -35,6 +35,75 @@ const describeMove = (move: Move): string => {
   return `${coordinate(move[0])} captures ${coordinate(move[1])} and lands at ${coordinate(move[2])}`;
 };
 
+const CAPTURE_LANES: [number, number, number][] = [];
+for (let y = 0; y < 5; y += 1) {
+  for (let x = 0; x < 5; x += 1) {
+    for (const [dx, dy] of [
+      [2, 0],
+      [0, 2],
+      [2, 2],
+      [2, -2],
+    ]) {
+      const destX = x + dx;
+      const destY = y + dy;
+      const isDiagonal = dx !== 0 && dy !== 0;
+      if (
+        destX >= 0 &&
+        destX < 5 &&
+        destY >= 0 &&
+        destY < 5 &&
+        (!isDiagonal || (x + y) % 2 === 0)
+      ) {
+        CAPTURE_LANES.push([
+          x + 5 * y,
+          x + dx / 2 + 5 * (y + dy / 2),
+          destX + 5 * destY,
+        ]);
+      }
+    }
+  }
+}
+
+const isEdge = (position: number): boolean => {
+  const x = position % 5;
+  const y = Math.floor(position / 5);
+  return x === 0 || x === 4 || y === 0 || y === 4;
+};
+
+const areAdjacent = (left: number, right: number): boolean => {
+  const leftX = left % 5;
+  const leftY = Math.floor(left / 5);
+  const dx = Math.abs(leftX - (right % 5));
+  const dy = Math.abs(leftY - Math.floor(right / 5));
+  return dx + dy === 1 || (dx === 1 && dy === 1 && (leftX + leftY) % 2 === 0);
+};
+
+const immediateTigerCaptures = (tigers: Set<number>, goats: Set<number>): number => {
+  const occupied = new Set([...tigers, ...goats]);
+  return CAPTURE_LANES.filter(
+    ([start, goat, end]) =>
+      (tigers.has(start) && goats.has(goat) && !occupied.has(end)) ||
+      (tigers.has(end) && goats.has(goat) && !occupied.has(start)),
+  ).length;
+};
+
+const describeGoatChoice = (move: Move, latest: number[][]): string => {
+  const tigers = new Set(latest[0]);
+  const goats = new Set(latest[1]);
+  const destination = move.length === 1 ? move[0] : move[1];
+  if (move.length === 1) {
+    goats.add(destination);
+  } else {
+    goats.delete(move[0]);
+    goats.add(destination);
+  }
+  const adjacent = [...goats].filter(
+    (goat) => goat !== destination && areAdjacent(destination, goat),
+  ).length;
+  const captures = immediateTigerCaptures(tigers, goats);
+  return `${describeMove(move)} — ${isEdge(destination) ? 'edge' : 'interior'}; ${adjacent} adjacent goat${adjacent === 1 ? '' : 's'}; gives tigers ${captures} immediate capture${captures === 1 ? '' : 's'}`;
+};
+
 const isPosition = (value: unknown): value is number =>
   Number.isInteger(value) && (value as number) >= 0 && (value as number) < 25;
 
@@ -86,7 +155,10 @@ export function buildJevInput(request: JevRequest): Record<string, unknown> {
   const latest = request.state.history[request.state.history.length - 1];
   const side = request.state.playerNum === 1 ? 'goat' : 'tiger';
   const criteria = Object.fromEntries(
-    request.possibleMoves.map((move, index) => [`move_${index}`, describeMove(move)]),
+    request.possibleMoves.map((move, index) => [
+      `move_${index}`,
+      side === 'goat' ? describeGoatChoice(move, latest) : describeMove(move),
+    ]),
   );
 
   return {
@@ -100,11 +172,32 @@ export function buildJevInput(request: JevRequest): Record<string, unknown> {
         tigers: latest[0].map(coordinate),
         goats: latest[1].map(coordinate),
       },
+      rules: {
+        board:
+          'Pieces move only along the lines of the 5-by-5 board. Orthogonal neighbours are connected; diagonal lines cross alternating cells. Every supplied choice is legal.',
+        turns:
+          'Goats move first and turns alternate. While goats remain to place, a goat turn places one goat on any empty point. After all 20 are placed, a goat steps to one adjacent empty connected point.',
+        goats:
+          'Goats never capture. They win by trapping all four tigers so no tiger has a legal step or jump.',
+        tigers:
+          'A tiger may step to an adjacent empty connected point, or jump over exactly one adjacent goat along a straight board line into the empty point immediately beyond it.',
+        capture:
+          'A tiger captures the jumped goat in a straight connected tiger-goat-empty pattern. The tiger lands on the empty point and the middle goat is removed. Tigers win after capturing five goats.',
+      },
+      strategy: {
+        goats:
+          'First avoid moves that give tigers an immediate capture. Among equally safe moves, build a connected edge formation, then reduce tiger mobility and close escape routes. Do not isolate goats or open a landing point behind one.',
+        tigers:
+          'Take useful captures, create multiple jump threats that goats cannot all answer, and preserve mobility so the tigers are not trapped. Prefer central control when no capture is available.',
+      },
     },
     questions: {
       move: {
         type: 'choice',
-        instructions: `Choose the strongest legal move for the ${side} side. Prefer captures and immediate wins, avoid immediate losses, and improve the side-to-move position.`,
+        instructions:
+          side === 'goat'
+            ? 'Choose the strongest legal move for the goat side. Follow the goat strategy. Minimize immediate tiger captures first; among equally safe choices prefer connected edge positions, restrict tiger mobility, and avoid opening jump lanes.'
+            : 'Choose the strongest legal move for the tiger side. Follow the tiger strategy. Prefer a useful immediate capture; otherwise create multiple capture threats while preserving tiger mobility and avoiding traps.',
         criteria,
       },
     },

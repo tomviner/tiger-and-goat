@@ -16,7 +16,7 @@ const requestBody = {
 
 describe('Jev move contract', () => {
   test('presents every legal move as a typed choice', () => {
-    expect(buildJevInput(requestBody)).toEqual({
+    expect(buildJevInput(requestBody)).toMatchObject({
       state: {
         game: 'Bagh-Chal (Tigers and Goats)',
         objective:
@@ -29,7 +29,7 @@ describe('Jev move contract', () => {
         move: {
           type: 'choice',
           instructions:
-            'Choose the strongest legal move for the tiger side. Prefer captures and immediate wins, avoid immediate losses, and improve the side-to-move position.',
+            'Choose the strongest legal move for the tiger side. Follow the tiger strategy. Prefer a useful immediate capture; otherwise create multiple capture threats while preserving tiger mobility and avoiding traps.',
           criteria: {
             move_0: 'A1 to B1',
             move_1: 'A1 to B2',
@@ -37,6 +37,38 @@ describe('Jev move contract', () => {
           },
         },
       },
+    });
+  });
+
+  test('teaches the rules and gives both sides fair tactical guidance', () => {
+    const input = buildJevInput(requestBody) as any;
+
+    expect(input.state.rules.capture).toContain('tiger-goat-empty');
+    expect(input.state.rules.goats).toContain('Goats never capture');
+    expect(input.state.rules.tigers).toContain('adjacent goat');
+    expect(input.state.strategy.goats).toContain('connected edge');
+    expect(input.state.strategy.tigers).toContain('preserve mobility');
+    expect(input.questions.move.instructions).toContain('tiger strategy');
+  });
+
+  test('shows Jev which goat choices are exposed, connected, and on the edge', () => {
+    const goatInput = buildJevInput({
+      state: {
+        playerNum: 1,
+        numGoatsToPlace: 20,
+        history: [[[0, 4, 20, 24], []]],
+      },
+      possibleMoves: [[1], [2], [12]],
+    }) as any;
+
+    expect(goatInput.questions.move.instructions).toContain(
+      'Minimize immediate tiger captures first',
+    );
+    expect(goatInput.questions.move.criteria).toEqual({
+      move_0: 'place at B1 — edge; 0 adjacent goats; gives tigers 1 immediate capture',
+      move_1: 'place at C1 — edge; 0 adjacent goats; gives tigers 0 immediate captures',
+      move_2:
+        'place at C3 — interior; 0 adjacent goats; gives tigers 0 immediate captures',
     });
   });
 
