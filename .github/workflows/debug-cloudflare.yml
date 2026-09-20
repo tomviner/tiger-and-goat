@@ -33,6 +33,7 @@ jobs:
             --environment production \
             --json | jq -r '.[0].url')
           timeout 25s npx wrangler pages deployment tail "$deployment_url" \
+            --project-name tigergoat \
             --format pretty \
             --status error > /tmp/cloudflare-tail.log 2>&1 &
           tail_pid=$!
