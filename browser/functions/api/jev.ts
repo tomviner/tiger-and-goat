@@ -115,10 +115,14 @@ export function moveFromJevResponse(
   value: unknown,
   possibleMoves: Move[],
 ): { move: Move; confidence: number | null; model: string | null } {
-  const response = value as {
+  type JevModelResponse = {
     model?: unknown;
     answers?: { move?: { choice?: unknown; confidence?: unknown } };
   };
+  const envelope = value as { result?: unknown };
+  const response = (
+    envelope?.result && typeof envelope.result === 'object' ? envelope.result : value
+  ) as JevModelResponse;
   const choice = response?.answers?.move?.choice;
   const match = typeof choice === 'string' ? /^move_(\d+)$/.exec(choice) : null;
   const index = match ? Number(match[1]) : -1;

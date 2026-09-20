@@ -52,6 +52,30 @@ describe('Jev move contract', () => {
     ).toEqual({ move: [0, 6], confidence: 0.82, model: 'jev-1.13.0' });
   });
 
+  test('unwraps the Cloudflare AI run result envelope', () => {
+    expect(
+      moveFromJevResponse(
+        {
+          state: 'Completed',
+          result: {
+            model: 'jev-1.13.0',
+            answers: {
+              move: {
+                type: 'choice',
+                choice: 'move_1',
+                probabilities: { move_0: 0.14, move_1: 0.76, move_2: 0.1 },
+                confidence: 0.64,
+              },
+            },
+            usage: { input_tokens: 468, output_tokens: 46 },
+          },
+          gatewayMetadata: { keySource: 'Unified' },
+        },
+        requestBody.possibleMoves,
+      ),
+    ).toEqual({ move: [0, 6], confidence: 0.64, model: 'jev-1.13.0' });
+  });
+
   test('rejects a choice that is not one of the supplied legal moves', () => {
     expect(() =>
       moveFromJevResponse(
@@ -74,10 +98,15 @@ describe('Jev move contract', () => {
           run: async (...args: unknown[]) => {
             calls.push(args);
             return {
-              model: 'jev-1.13.0',
-              answers: {
-                move: { type: 'choice', choice: 'move_2', confidence: 0.75 },
+              state: 'Completed',
+              result: {
+                model: 'jev-1.13.0',
+                answers: {
+                  move: { type: 'choice', choice: 'move_2', confidence: 0.75 },
+                },
+                usage: { input_tokens: 468, output_tokens: 46 },
               },
+              gatewayMetadata: { keySource: 'Unified' },
             };
           },
         },
