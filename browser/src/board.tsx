@@ -21,6 +21,11 @@ import {
 } from './State';
 import { range2d } from './utils';
 
+// Piece moves transition for 1s. Leave a little paint margin before another
+// automatic turn updates the board; two plies also outlast the 2s capture
+// transition, so a following tiger capture cannot replace it early.
+const AUTO_MOVE_DELAY_MS = 1200;
+
 function Board(): JSX.Element {
   const setUpdatedGame = useSetRecoilState(updatedGameState);
   const stateOfGame = useRecoilValue(stateOfGameState);
@@ -80,7 +85,7 @@ function Board(): JSX.Element {
           console.error(error);
           setMoveError(error instanceof Error ? error.message : 'The AI move failed');
         });
-    }, 600);
+    }, AUTO_MOVE_DELAY_MS);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [engineToMove, result, stateOfGame, controllers, mode]);

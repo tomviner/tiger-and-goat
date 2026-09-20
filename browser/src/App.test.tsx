@@ -1,9 +1,17 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import React from 'react';
 import { afterEach, expect, test, vi } from 'vitest';
+import { parseUpdatedGame } from './api';
 import App from './App';
-import { localOpponents } from './engine/local';
-import { fetchOpponents } from './gameSource';
+import { localOpponents, localStart } from './engine/local';
+import { fetchOpponents, fetchStart, sendMove } from './gameSource';
 
 vi.mock('./gameSource', () => ({
   fetchStart: vi.fn(() => new Promise(() => undefined)),
@@ -13,8 +21,11 @@ vi.mock('./gameSource', () => ({
 
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   window.history.replaceState({}, '', '/');
+  vi.mocked(fetchStart).mockImplementation(() => new Promise(() => undefined));
   vi.mocked(fetchOpponents).mockImplementation(() => new Promise(() => undefined));
+  vi.mocked(sendMove).mockImplementation(() => new Promise(() => undefined));
 });
 
 test('offers Jev for both goats and tigers', () => {
@@ -74,4 +85,27 @@ test('ignores invalid controller presets', async () => {
     expect(screen.getByLabelText(/^Tiger:/)).toHaveValue('ai');
     expect(screen.getByLabelText('Tiger AI depth')).toHaveValue('6');
   });
+});
+
+test('lets a move animation finish before advancing another automatic player', async () => {
+  vi.mocked(fetchStart).mockResolvedValue(parseUpdatedGame(localStart()));
+  vi.mocked(fetchOpponents).mockResolvedValue(localOpponents());
+  vi.mocked(sendMove).mockImplementation(() => new Promise(() => undefined));
+
+  render(<App />);
+
+  await waitFor(() => {
+    expect(document.querySelectorAll('.tiger.piece')).toHaveLength(4);
+  });
+
+  vi.useFakeTimers();
+  fireEvent.change(screen.getByLabelText(/^Goat:/), {
+    target: { value: 'ai' },
+  });
+
+  await act(async () => vi.advanceTimersByTimeAsync(1000));
+  expect(sendMove).not.toHaveBeenCalled();
+
+  await act(async () => vi.advanceTimersByTimeAsync(200));
+  expect(sendMove).toHaveBeenCalledTimes(1);
 });
