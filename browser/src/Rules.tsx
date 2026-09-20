@@ -14,8 +14,9 @@ function Rules(): JSX.Element {
       <h2>The board and pieces</h2>
       <ul>
         <li>
-          25 points connected by lines — every point joins to its orthogonal neighbours,
-          and diagonals run across alternating cells.
+          25 points joined by lines. Horizontal and vertical neighbours are always
+          connected. Some diagonally neighbouring points are joined too; a piece may use
+          a diagonal only where that line is drawn.
         </li>
         <li>
           <b>4 tigers</b> start on the four corner points.

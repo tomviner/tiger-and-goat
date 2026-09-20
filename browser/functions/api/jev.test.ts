@@ -43,6 +43,9 @@ describe('Jev move contract', () => {
   test('teaches the rules and gives both sides fair tactical guidance', () => {
     const input = buildJevInput(requestBody) as any;
 
+    expect(input.state.rules.board).toBe(
+      'The board has 25 points joined by lines. A piece may move between two adjacent points only when a line directly connects them. Horizontal and vertical neighbours are always connected. Diagonally neighbouring points are connected only where a diagonal line is drawn on the board. Every supplied choice is legal.',
+    );
     expect(input.state.rules.capture).toContain('tiger-goat-empty');
     expect(input.state.rules.goats).toContain('Goats never capture');
     expect(input.state.rules.tigers).toContain('adjacent goat');
@@ -51,7 +54,7 @@ describe('Jev move contract', () => {
     expect(input.questions.move.instructions).toContain('tiger strategy');
   });
 
-  test('shortlists safe edge choices and explains why they are preferred', () => {
+  test('presents every legal goat move with tactical advice in its original order', () => {
     const goatInput = buildJevInput({
       state: {
         playerNum: 1,
@@ -65,11 +68,14 @@ describe('Jev move contract', () => {
       'Minimize immediate tiger captures first',
     );
     expect(goatInput.questions.move.criteria).toEqual({
-      move_0: 'place at C1 — edge; 0 adjacent goats; gives tigers 0 immediate captures',
+      move_0: 'place at B1 — edge; 0 adjacent goats; gives tigers 1 immediate capture',
+      move_1: 'place at C1 — edge; 0 adjacent goats; gives tigers 0 immediate captures',
+      move_2:
+        'place at C3 — interior; 0 adjacent goats; gives tigers 0 immediate captures',
     });
   });
 
-  test('maps a shortlisted goat choice back to its original legal move', async () => {
+  test('maps a goat choice back to the legal move at the same index', async () => {
     const response = await onRequestPost({
       request: new Request('https://tigergoat.tomv.uk/api/jev', {
         method: 'POST',
@@ -97,7 +103,7 @@ describe('Jev move contract', () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
-      move: [2],
+      move: [1],
       confidence: 0.9,
       model: 'jev-1.13.0',
     });

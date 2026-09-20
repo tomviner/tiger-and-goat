@@ -181,18 +181,10 @@ function jevChoices(request: JevRequest): JevChoice[] {
   }
 
   const latest = request.state.history[request.state.history.length - 1];
-  const choices = request.possibleMoves.map((move) => ({
+  return request.possibleMoves.map((move) => ({
     move,
-    ...goatChoiceInfo(move, latest),
+    description: goatChoiceInfo(move, latest).description,
   }));
-  const fewestCaptures = Math.min(...choices.map((choice) => choice.immediateCaptures));
-  const safest = choices.filter(
-    (choice) => choice.immediateCaptures === fewestCaptures,
-  );
-  const preferred = safest.some((choice) => choice.edge)
-    ? safest.filter((choice) => choice.edge)
-    : safest;
-  return preferred.map(({ move, description }) => ({ move, description }));
 }
 
 export function buildJevInput(
@@ -218,7 +210,7 @@ export function buildJevInput(
       },
       rules: {
         board:
-          'Pieces move only along the lines of the 5-by-5 board. Orthogonal neighbours are connected; diagonal lines cross alternating cells. Every supplied choice is legal.',
+          'The board has 25 points joined by lines. A piece may move between two adjacent points only when a line directly connects them. Horizontal and vertical neighbours are always connected. Diagonally neighbouring points are connected only where a diagonal line is drawn on the board. Every supplied choice is legal.',
         turns:
           'Goats move first and turns alternate. While goats remain to place, a goat turn places one goat on any empty point. After all 20 are placed, a goat steps to one adjacent empty connected point.',
         goats:
