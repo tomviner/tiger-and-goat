@@ -138,7 +138,12 @@ function isJevRequest(value: unknown): value is JevRequest {
       (position) =>
         Array.isArray(position) &&
         position.length === 2 &&
-        position.every((pieces) => Array.isArray(pieces) && pieces.every(isPosition)),
+        position.every((pieces) => Array.isArray(pieces) && pieces.every(isPosition)) &&
+        position[0].length === 4 &&
+        position[1].length <= 20 &&
+        new Set(position[0]).size === position[0].length &&
+        new Set(position[1]).size === position[1].length &&
+        position[0].every((tiger) => !position[1].includes(tiger)),
     )
   ) {
     return false;

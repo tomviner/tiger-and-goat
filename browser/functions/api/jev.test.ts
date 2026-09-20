@@ -182,6 +182,35 @@ describe('Jev move contract', () => {
     expect(called).toBe(false);
   });
 
+  test('rejects oversized or duplicate piece snapshots before annotation work', async () => {
+    let called = false;
+    const response = await onRequestPost({
+      request: new Request('https://tigergoat.tomv.uk/api/jev', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          ...requestBody,
+          state: {
+            ...requestBody.state,
+            history: [[[0, 4, 20, 24], new Array(1_000).fill(12)]],
+          },
+        }),
+      }),
+      env: {
+        AI: {
+          run: async () => {
+            called = true;
+            return {};
+          },
+        },
+      },
+    });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: 'Invalid game state' });
+    expect(called).toBe(false);
+  });
+
   test('rejects browser requests originating from another site', async () => {
     let called = false;
     const response = await onRequestPost({
