@@ -51,7 +51,7 @@ describe('Jev move contract', () => {
     expect(input.questions.move.instructions).toContain('tiger strategy');
   });
 
-  test('shows Jev which goat choices are exposed, connected, and on the edge', () => {
+  test('shortlists safe edge choices and explains why they are preferred', () => {
     const goatInput = buildJevInput({
       state: {
         playerNum: 1,
@@ -65,10 +65,41 @@ describe('Jev move contract', () => {
       'Minimize immediate tiger captures first',
     );
     expect(goatInput.questions.move.criteria).toEqual({
-      move_0: 'place at B1 — edge; 0 adjacent goats; gives tigers 1 immediate capture',
-      move_1: 'place at C1 — edge; 0 adjacent goats; gives tigers 0 immediate captures',
-      move_2:
-        'place at C3 — interior; 0 adjacent goats; gives tigers 0 immediate captures',
+      move_0: 'place at C1 — edge; 0 adjacent goats; gives tigers 0 immediate captures',
+    });
+  });
+
+  test('maps a shortlisted goat choice back to its original legal move', async () => {
+    const response = await onRequestPost({
+      request: new Request('https://tigergoat.tomv.uk/api/jev', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          state: {
+            playerNum: 1,
+            numGoatsToPlace: 20,
+            history: [[[0, 4, 20, 24], []]],
+          },
+          possibleMoves: [[1], [2], [12]],
+        }),
+      }),
+      env: {
+        AI: {
+          run: async () => ({
+            model: 'jev-1.13.0',
+            answers: {
+              move: { type: 'choice', choice: 'move_0', confidence: 0.9 },
+            },
+          }),
+        },
+      },
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      move: [2],
+      confidence: 0.9,
+      model: 'jev-1.13.0',
     });
   });
 

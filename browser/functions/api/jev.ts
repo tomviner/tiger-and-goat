@@ -87,7 +87,13 @@ const immediateTigerCaptures = (tigers: Set<number>, goats: Set<number>): number
   ).length;
 };
 
-const describeGoatChoice = (move: Move, latest: number[][]): string => {
+interface GoatChoiceInfo {
+  description: string;
+  immediateCaptures: number;
+  edge: boolean;
+}
+
+const goatChoiceInfo = (move: Move, latest: number[][]): GoatChoiceInfo => {
   const tigers = new Set(latest[0]);
   const goats = new Set(latest[1]);
   const destination = move.length === 1 ? move[0] : move[1];
@@ -101,7 +107,12 @@ const describeGoatChoice = (move: Move, latest: number[][]): string => {
     (goat) => goat !== destination && areAdjacent(destination, goat),
   ).length;
   const captures = immediateTigerCaptures(tigers, goats);
-  return `${describeMove(move)} — ${isEdge(destination) ? 'edge' : 'interior'}; ${adjacent} adjacent goat${adjacent === 1 ? '' : 's'}; gives tigers ${captures} immediate capture${captures === 1 ? '' : 's'}`;
+  const edge = isEdge(destination);
+  return {
+    description: `${describeMove(move)} — ${edge ? 'edge' : 'interior'}; ${adjacent} adjacent goat${adjacent === 1 ? '' : 's'}; gives tigers ${captures} immediate capture${captures === 1 ? '' : 's'}`,
+    immediateCaptures: captures,
+    edge,
+  };
 };
 
 const isPosition = (value: unknown): value is number =>
@@ -156,14 +167,42 @@ function isJevRequest(value: unknown): value is JevRequest {
   );
 }
 
-export function buildJevInput(request: JevRequest): Record<string, unknown> {
+interface JevChoice {
+  move: Move;
+  description: string;
+}
+
+function jevChoices(request: JevRequest): JevChoice[] {
+  if (request.state.playerNum === 2) {
+    return request.possibleMoves.map((move) => ({
+      move,
+      description: describeMove(move),
+    }));
+  }
+
+  const latest = request.state.history[request.state.history.length - 1];
+  const choices = request.possibleMoves.map((move) => ({
+    move,
+    ...goatChoiceInfo(move, latest),
+  }));
+  const fewestCaptures = Math.min(...choices.map((choice) => choice.immediateCaptures));
+  const safest = choices.filter(
+    (choice) => choice.immediateCaptures === fewestCaptures,
+  );
+  const preferred = safest.some((choice) => choice.edge)
+    ? safest.filter((choice) => choice.edge)
+    : safest;
+  return preferred.map(({ move, description }) => ({ move, description }));
+}
+
+export function buildJevInput(
+  request: JevRequest,
+  choices = jevChoices(request),
+): Record<string, unknown> {
   const latest = request.state.history[request.state.history.length - 1];
   const side = request.state.playerNum === 1 ? 'goat' : 'tiger';
   const criteria = Object.fromEntries(
-    request.possibleMoves.map((move, index) => [
-      `move_${index}`,
-      side === 'goat' ? describeGoatChoice(move, latest) : describeMove(move),
-    ]),
+    choices.map((choice, index) => [`move_${index}`, choice.description]),
   );
 
   return {
@@ -261,10 +300,20 @@ export async function onRequestPost(context: FunctionContext): Promise<Response>
   }
 
   try {
-    const response = await context.env.AI.run('typesafe/jev', buildJevInput(body), {
-      gateway: { id: 'tigergoat-jev' },
-    });
-    return json(moveFromJevResponse(response, body.possibleMoves));
+    const choices = jevChoices(body);
+    const response = await context.env.AI.run(
+      'typesafe/jev',
+      buildJevInput(body, choices),
+      {
+        gateway: { id: 'tigergoat-jev' },
+      },
+    );
+    return json(
+      moveFromJevResponse(
+        response,
+        choices.map((choice) => choice.move),
+      ),
+    );
   } catch (error) {
     console.error('Jev inference failed', error);
     return json({ error: 'Jev could not choose a move' }, 502);
