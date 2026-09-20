@@ -32,16 +32,20 @@ jobs:
             --project-name tigergoat \
             --environment production \
             --json | jq -r '.[0].Deployment')
-          timeout 25s npx wrangler pages deployment tail "$deployment_url" \
+          timeout 45s npx wrangler pages deployment tail "$deployment_url" \
             --project-name tigergoat \
             --format pretty \
             --status error > /tmp/cloudflare-tail.log 2>&1 &
           tail_pid=$!
-          sleep 8
+          for _ in {1..30}; do
+            grep -q 'Connected to deployment' /tmp/cloudflare-tail.log && break
+            sleep 1
+          done
           curl --silent --show-error https://tigergoat.tomv.uk/api/jev \
             -H 'origin: https://tigergoat.tomv.uk' \
             -H 'content-type: application/json' \
             --data '{"state":{"playerNum":2,"numGoatsToPlace":19,"history":[[[0,4,20,24],[12]]]},"possibleMoves":[[0,1],[0,6],[4,3]]}' || true
-          sleep 8
+          sleep 5
+          kill "$tail_pid" || true
           wait "$tail_pid" || true
           cat /tmp/cloudflare-tail.log
