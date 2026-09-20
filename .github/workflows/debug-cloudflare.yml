@@ -31,7 +31,7 @@ jobs:
           deployment_url=$(npx wrangler pages deployment list \
             --project-name tigergoat \
             --environment production \
-            --json | jq -r '.[0].url')
+            --json | jq -r '.[0].Deployment')
           timeout 25s npx wrangler pages deployment tail "$deployment_url" \
             --project-name tigergoat \
             --format pretty \
