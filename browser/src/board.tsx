@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { Controller, OpponentsInfo } from './api';
+import { Controller, Controllers, OpponentsInfo } from './api';
 import './board.css';
+import { controllersFromSearch, SideKey, urlForControllers } from './controllerParams';
 import Debug from './Debug';
 import { fetchOpponents, fetchStart, sendMove } from './gameSource';
 import GoatsEaten from './GoatsEaten';
@@ -20,8 +21,6 @@ import {
 } from './State';
 import { range2d } from './utils';
 
-type SideKey = 'goat' | 'tiger';
-
 function Board(): JSX.Element {
   const setUpdatedGame = useSetRecoilState(updatedGameState);
   const stateOfGame = useRecoilValue(stateOfGameState);
@@ -32,6 +31,7 @@ function Board(): JSX.Element {
   const [mode, setMode] = useRecoilState(engineModeState);
   const setMoveLog = useSetRecoilState(moveLogState);
   const [moveError, setMoveError] = useState('');
+  const urlPresetApplied = useRef(false);
 
   // (Re)start a game whenever the engine mode changes.
   const newGame = () => {
@@ -45,6 +45,16 @@ function Board(): JSX.Element {
     fetchOpponents(mode).then(setOpponents).catch(console.error);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
+
+  useEffect(() => {
+    if (!opponents || urlPresetApplied.current) return;
+    urlPresetApplied.current = true;
+    const params = new URLSearchParams(window.location.search);
+    if (!['both', 'goat', 'tiger'].some((name) => params.has(name))) return;
+    setControllers((current) =>
+      controllersFromSearch(window.location.search, current, opponents),
+    );
+  }, [opponents, setControllers]);
 
   // Auto-advance: whenever the side to move is engine-controlled (AI or a
   // strategy), ask the engine for its move. This drives human-vs-engine,
@@ -84,8 +94,17 @@ function Board(): JSX.Element {
 
   const usesJev = controllers.goat.type === 'jev' || controllers.tiger.type === 'jev';
 
+  const setControllersAndUrl = (next: Controllers) => {
+    setControllers(next);
+    window.history.replaceState(
+      window.history.state,
+      '',
+      urlForControllers(window.location.href, next),
+    );
+  };
+
   const setController = (side: SideKey, controller: Controller) =>
-    setControllers({ ...controllers, [side]: controller });
+    setControllersAndUrl({ ...controllers, [side]: controller });
 
   // Swap the two sides' controllers. A strategy is side-specific, so if one
   // lands on the wrong side it falls back to the AI.
@@ -101,7 +120,7 @@ function Board(): JSX.Element {
       }
       return controller;
     };
-    setControllers({
+    setControllersAndUrl({
       goat: onSide(controllers.tiger, 'goat'),
       tiger: onSide(controllers.goat, 'tiger'),
     });
@@ -149,6 +168,7 @@ function Board(): JSX.Element {
             {' '}
             depth{' '}
             <select
+              aria-label={`${label} AI depth`}
               value={controller.depth}
               onChange={(e) =>
                 setController(side, { type: 'ai', depth: Number(e.target.value) })

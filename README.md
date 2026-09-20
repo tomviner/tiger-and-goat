@@ -59,6 +59,21 @@ are eventually consistent, so a concurrent burst can exceed the dollar limit
 slightly before enforcement catches up; the finite prepaid balance is the
 account-level backstop.
 
+### Shareable opponents
+
+Use `goat`, `tiger`, or `both` query parameters to open the game with particular
+opponents selected:
+
+- Human goats against Jev tigers: <https://tigergoat.tomv.uk/?goat=human&tiger=jev>
+- Jev against Jev: <https://tigergoat.tomv.uk/?both=jev>
+- Edge-safe goats against depth-3 Negamax tigers:
+  <https://tigergoat.tomv.uk/?goat=goat-safe-edge&tiger=ai-3>
+
+Values can be `human`, `jev`, `ai-N` (where `N` is an available Negamax depth),
+or one of the named strategies shown in the selectors. A side-specific value
+overrides `both`. Changing a selector updates the current URL so it can be
+copied directly; invalid values are ignored.
+
 ## Deployment
 
 The static build is hosted on **Cloudflare Pages** at
