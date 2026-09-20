@@ -31,9 +31,11 @@ function Board(): JSX.Element {
   const [opponents, setOpponents] = useState<OpponentsInfo | null>(null);
   const [mode, setMode] = useRecoilState(engineModeState);
   const setMoveLog = useSetRecoilState(moveLogState);
+  const [moveError, setMoveError] = useState('');
 
   // (Re)start a game whenever the engine mode changes.
   const newGame = () => {
+    setMoveError('');
     setMoveLog([]);
     fetchStart(mode).then(setUpdatedGame).catch(console.error);
   };
@@ -55,6 +57,7 @@ function Board(): JSX.Element {
       return;
     }
     const timer = setTimeout(() => {
+      setMoveError('');
       sendMove(mode, stateOfGame, null, controllers)
         .then((updated) => {
           const remoteMove = updated.remoteMove;
@@ -63,7 +66,10 @@ function Board(): JSX.Element {
           }
           setUpdatedGame(updated);
         })
-        .catch(console.error);
+        .catch((error) => {
+          console.error(error);
+          setMoveError(error instanceof Error ? error.message : 'The AI move failed');
+        });
     }, 600);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -107,13 +113,17 @@ function Board(): JSX.Element {
         ? 'human'
         : controller.type === 'ai'
           ? 'ai'
-          : controller.name;
+          : controller.type === 'jev'
+            ? 'jev'
+            : controller.name;
 
     const onSelect = (selected: string) => {
       if (selected === 'human') {
         setController(side, { type: 'human' });
       } else if (selected === 'ai') {
         setController(side, { type: 'ai', depth: opponents?.depth.default ?? 6 });
+      } else if (selected === 'jev') {
+        setController(side, { type: 'jev' });
       } else {
         setController(side, { type: 'strategy', name: selected });
       }
@@ -125,6 +135,7 @@ function Board(): JSX.Element {
         <select value={value} onChange={(e) => onSelect(e.target.value)}>
           <option value="human">Human</option>
           <option value="ai">AI (Negamax)</option>
+          <option value="jev">Jev (Cloudflare)</option>
           {strategies.map((s) => (
             <option key={s.name} value={s.name} title={s.description}>
               {s.name}
@@ -157,6 +168,11 @@ function Board(): JSX.Element {
     <>
       <DndProvider backend={HTML5Backend}>
         <div className="result">{result}</div>
+        {moveError ? (
+          <div className="moveError" role="alert">
+            {moveError}
+          </div>
+        ) : null}
         <div className="controls">
           {renderSide('goat', 'Goat')}
           <button className="swapButton" onClick={swapSides} title="Swap sides">

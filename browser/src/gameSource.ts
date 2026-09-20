@@ -5,6 +5,7 @@ import { List } from 'immutable';
 import {
   Controllers,
   getData,
+  getJevMove,
   getOpponents,
   OpponentsInfo,
   parseUpdatedGame,
@@ -45,7 +46,8 @@ export function sendMove(
   move: List<number> | null,
   controllers: Controllers,
 ): Promise<UpdatedGameType> {
-  if (mode === 'local') {
+  const usesJev = controllers.goat.type === 'jev' || controllers.tiger.type === 'jev';
+  if (mode === 'local' || usesJev) {
     const plainState = {
       playerNum: stateOfGame.playerNum,
       numGoatsToPlace: stateOfGame.numGoatsToPlace,
@@ -53,9 +55,39 @@ export function sendMove(
     };
     const plainMove = move ? (move.toArray() as number[]) : null;
     try {
-      return Promise.resolve(
-        parseUpdatedGame(localMove(plainState, plainMove, controllers)),
-      );
+      const updated = localMove(plainState, plainMove, controllers);
+      const turnSide = updated.playerNum === 1 ? 'goat' : 'tiger';
+      if (updated.result || controllers[turnSide].type !== 'jev') {
+        return Promise.resolve(parseUpdatedGame(updated));
+      }
+
+      return getJevMove(
+        {
+          playerNum: updated.playerNum,
+          numGoatsToPlace: updated.numGoatsToPlace,
+          history: updated.history,
+        },
+        updated.possibleMoves,
+      ).then(({ move: jevMove }) => {
+        const legal = updated.possibleMoves.some(
+          (candidate) =>
+            candidate.length === jevMove.length &&
+            candidate.every((position, index) => position === jevMove[index]),
+        );
+        if (!legal) {
+          throw new Error('Jev returned an illegal move');
+        }
+        const applied = localMove(
+          {
+            playerNum: updated.playerNum,
+            numGoatsToPlace: updated.numGoatsToPlace,
+            history: updated.history,
+          },
+          jevMove,
+          { goat: { type: 'human' }, tiger: { type: 'human' } },
+        );
+        return parseUpdatedGame({ ...applied, remoteMove: jevMove });
+      });
     } catch (error) {
       return Promise.reject(error);
     }

@@ -180,6 +180,17 @@ describe('local API mirrors the server', () => {
     expect(data.remoteMove).not.toBeNull();
   });
 
+  test('Jev waits for the Cloudflare decision instead of using local search', () => {
+    const start = localStart();
+    const data = localMove(start, null, {
+      goat: { type: 'jev' },
+      tiger: { type: 'ai', depth: 2 },
+    } as any);
+    expect(data.playerNum).toBe(1);
+    expect(data.remoteMove).toBeNull();
+    expect(data.history).toEqual(start.history);
+  });
+
   test('rejects an illegal move', () => {
     const start = localStart();
     expect(() =>

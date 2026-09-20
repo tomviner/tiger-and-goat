@@ -1,6 +1,6 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { test, vi } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import App from './App';
 
 vi.mock('./gameSource', () => ({
@@ -9,8 +9,7 @@ vi.mock('./gameSource', () => ({
   sendMove: vi.fn(),
 }));
 
-test('renders learn react link', () => {
+test('offers Jev for both goats and tigers', () => {
   render(<App />);
-  // const linkElement = screen.getByText(/learn react/i);
-  // expect(linkElement).toBeInTheDocument();
+  expect(screen.getAllByRole('option', { name: 'Jev (Cloudflare)' })).toHaveLength(2);
 });

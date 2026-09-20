@@ -55,6 +55,12 @@
   font-size: xx-large;
 }
 
+.moveError {
+  margin: 8px auto;
+  color: #8b1e1e;
+  font-weight: 600;
+}
+
 .controls {
   display: flex;
   flex-wrap: wrap;

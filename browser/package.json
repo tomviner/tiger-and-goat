@@ -11,8 +11,8 @@
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "format": "prettier --write \"src/**/*.{js,ts,tsx,css}\"",
-    "format:check": "prettier --check \"src/**/*.{js,ts,tsx,css}\"",
+    "format": "prettier --write \"{src,functions}/**/*.{js,ts,tsx,css}\"",
+    "format:check": "prettier --check \"{src,functions}/**/*.{js,ts,tsx,css}\"",
     "build:static": "VITE_ENGINE=local npm run build",
     "deploy": "npm run build:static && wrangler pages deploy dist --project-name tigergoat --branch main"
   },

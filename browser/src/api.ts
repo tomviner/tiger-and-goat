@@ -9,6 +9,7 @@ const api = create({
 export type Controller =
   | { type: 'human' }
   | { type: 'ai'; depth: number }
+  | { type: 'jev' }
   | { type: 'strategy'; name: string };
 
 export interface Controllers {
@@ -26,6 +27,30 @@ export interface StrategyInfo {
 export interface OpponentsInfo {
   strategies: StrategyInfo[];
   depth: { min: number; max: number; default: number };
+}
+
+export interface JevMove {
+  move: number[];
+  confidence: number | null;
+  model: string | null;
+}
+
+export async function getJevMove(
+  state: { playerNum: number; numGoatsToPlace: number; history: number[][][] },
+  possibleMoves: number[][],
+): Promise<JevMove> {
+  const response = await fetch('/api/jev', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ state, possibleMoves }),
+  });
+  const data = (await response.json()) as JevMove | { error?: string };
+  if (!response.ok) {
+    throw new Error(
+      'error' in data && data.error ? data.error : `Jev failed (${response.status})`,
+    );
+  }
+  return data as JevMove;
 }
 
 export const getOpponents = (): Promise<OpponentsInfo> =>

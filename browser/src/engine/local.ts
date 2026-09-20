@@ -99,7 +99,9 @@ export function localMove(
   if (!isOver(state)) {
     const controller =
       state.currentPlayer === GOAT_PLAYER ? controllers.goat : controllers.tiger;
-    if (controller.type !== 'human') {
+    // Jev is asynchronous and runs in a Cloudflare Pages Function. Yield the
+    // unchanged state so gameSource can ask it for a typed legal-move choice.
+    if (controller.type !== 'human' && controller.type !== 'jev') {
       remoteMove = engineMove(state, controller);
       makeMove(state, remoteMove);
     }

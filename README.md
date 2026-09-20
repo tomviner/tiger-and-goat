@@ -38,13 +38,21 @@ An **Engine** dropdown in the UI switches between:
 - **Local (in-browser)** — moves are computed client-side, no backend needed.
 
 This means the client can be deployed as a **purely static site** with no
-server. Build one with the local engine as the default:
+Python server. Build one with the local engine as the default:
 
 ```console
 VITE_ENGINE=local npm --prefix browser run build
 ```
 
-The contents of `browser/dist/` are then a complete, backend-free game.
+The board and Negamax opponents live entirely in `browser/dist/`. The optional
+**Jev (Cloudflare)** opponent for either side calls the same-origin `/api/jev`
+Pages Function, which uses the `typesafe/jev` Workers AI model to choose among
+the moves calculated and validated by the local engine. No Cloudflare
+credential is sent to the browser. The endpoint rejects cross-origin browser
+requests and cannot select another model or submit an arbitrary prompt. The
+Cloudflare account remains on Workers Free, whose daily Workers AI allocation
+is a hard ceiling: exhausting it makes Jev turns fail until the UTC reset but
+does not create paid overage.
 
 ## Deployment
 
@@ -59,8 +67,8 @@ Deploy the content (requires a wrangler login with `pages:write`):
 npm --prefix browser run deploy
 ```
 
-This builds the local-engine bundle and uploads it to the `tigergoat` Pages
-project.
+This builds the local-engine bundle and uploads it, the Pages Function, and its
+Workers AI binding to the `tigergoat` Pages project.
 
 DNS and the custom domain are managed with Pulumi in [`infra/`](infra/): it
 looks up the existing `tomv.uk` Cloudflare zone read-only, creates the
