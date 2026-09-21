@@ -31,16 +31,16 @@ describe('Jev move contract', () => {
           instructions:
             'Choose the strongest legal move for the tiger side. Follow the tiger strategy. Prefer a useful immediate capture; otherwise create multiple capture threats while preserving tiger mobility and avoiding traps.',
           criteria: {
-            move_0: 'A1 to B1',
-            move_1: 'A1 to B2',
-            move_2: 'E1 to D1',
+            move_0: 'A1-B1',
+            move_1: 'A1-B2',
+            move_2: 'E1-D1',
           },
         },
       },
     });
   });
 
-  test('teaches the rules and gives both sides fair tactical guidance', () => {
+  test('teaches the rules and gives both sides static tactical guidance', () => {
     const input = buildJevInput(requestBody) as any;
 
     expect(input.state.rules.board).toBe(
@@ -54,7 +54,7 @@ describe('Jev move contract', () => {
     expect(input.questions.move.instructions).toContain('tiger strategy');
   });
 
-  test('presents every legal goat move with tactical advice in its original order', () => {
+  test('presents every legal goat move without derived tactical annotations', () => {
     const goatInput = buildJevInput({
       state: {
         playerNum: 1,
@@ -68,10 +68,25 @@ describe('Jev move contract', () => {
       'Minimize immediate tiger captures first',
     );
     expect(goatInput.questions.move.criteria).toEqual({
-      move_0: 'place at B1 — edge; 0 adjacent goats; gives tigers 1 immediate capture',
-      move_1: 'place at C1 — edge; 0 adjacent goats; gives tigers 0 immediate captures',
-      move_2:
-        'place at C3 — interior; 0 adjacent goats; gives tigers 0 immediate captures',
+      move_0: 'B1',
+      move_1: 'C1',
+      move_2: 'C3',
+    });
+  });
+
+  test('lists a legal capture neutrally instead of identifying it for Jev', () => {
+    const tigerInput = buildJevInput({
+      state: {
+        playerNum: 2,
+        numGoatsToPlace: 19,
+        history: [[[0, 4, 20, 24], [1]]],
+      },
+      possibleMoves: [[0, 1, 2]],
+    }) as any;
+
+    expect(tigerInput.state.rules.capture).toContain('middle goat is removed');
+    expect(tigerInput.questions.move.criteria).toEqual({
+      move_0: 'A1-B1-C1',
     });
   });
 
@@ -219,7 +234,7 @@ describe('Jev move contract', () => {
     expect(called).toBe(false);
   });
 
-  test('rejects oversized or duplicate piece snapshots before annotation work', async () => {
+  test('rejects oversized or duplicate piece snapshots before inference', async () => {
     let called = false;
     const response = await onRequestPost({
       request: new Request('https://tigergoat.tomv.uk/api/jev', {

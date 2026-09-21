@@ -25,95 +25,7 @@ interface FunctionContext {
 const coordinate = (position: number): string =>
   `${'ABCDE'[position % 5]}${Math.floor(position / 5) + 1}`;
 
-const describeMove = (move: Move): string => {
-  if (move.length === 1) {
-    return `place at ${coordinate(move[0])}`;
-  }
-  if (move.length === 2) {
-    return `${coordinate(move[0])} to ${coordinate(move[1])}`;
-  }
-  return `${coordinate(move[0])} captures ${coordinate(move[1])} and lands at ${coordinate(move[2])}`;
-};
-
-const CAPTURE_LANES: [number, number, number][] = [];
-for (let y = 0; y < 5; y += 1) {
-  for (let x = 0; x < 5; x += 1) {
-    for (const [dx, dy] of [
-      [2, 0],
-      [0, 2],
-      [2, 2],
-      [2, -2],
-    ]) {
-      const destX = x + dx;
-      const destY = y + dy;
-      const isDiagonal = dx !== 0 && dy !== 0;
-      if (
-        destX >= 0 &&
-        destX < 5 &&
-        destY >= 0 &&
-        destY < 5 &&
-        (!isDiagonal || (x + y) % 2 === 0)
-      ) {
-        CAPTURE_LANES.push([
-          x + 5 * y,
-          x + dx / 2 + 5 * (y + dy / 2),
-          destX + 5 * destY,
-        ]);
-      }
-    }
-  }
-}
-
-const isEdge = (position: number): boolean => {
-  const x = position % 5;
-  const y = Math.floor(position / 5);
-  return x === 0 || x === 4 || y === 0 || y === 4;
-};
-
-const areAdjacent = (left: number, right: number): boolean => {
-  const leftX = left % 5;
-  const leftY = Math.floor(left / 5);
-  const dx = Math.abs(leftX - (right % 5));
-  const dy = Math.abs(leftY - Math.floor(right / 5));
-  return dx + dy === 1 || (dx === 1 && dy === 1 && (leftX + leftY) % 2 === 0);
-};
-
-const immediateTigerCaptures = (tigers: Set<number>, goats: Set<number>): number => {
-  const occupied = new Set([...tigers, ...goats]);
-  return CAPTURE_LANES.filter(
-    ([start, goat, end]) =>
-      (tigers.has(start) && goats.has(goat) && !occupied.has(end)) ||
-      (tigers.has(end) && goats.has(goat) && !occupied.has(start)),
-  ).length;
-};
-
-interface GoatChoiceInfo {
-  description: string;
-  immediateCaptures: number;
-  edge: boolean;
-}
-
-const goatChoiceInfo = (move: Move, latest: number[][]): GoatChoiceInfo => {
-  const tigers = new Set(latest[0]);
-  const goats = new Set(latest[1]);
-  const destination = move.length === 1 ? move[0] : move[1];
-  if (move.length === 1) {
-    goats.add(destination);
-  } else {
-    goats.delete(move[0]);
-    goats.add(destination);
-  }
-  const adjacent = [...goats].filter(
-    (goat) => goat !== destination && areAdjacent(destination, goat),
-  ).length;
-  const captures = immediateTigerCaptures(tigers, goats);
-  const edge = isEdge(destination);
-  return {
-    description: `${describeMove(move)} — ${edge ? 'edge' : 'interior'}; ${adjacent} adjacent goat${adjacent === 1 ? '' : 's'}; gives tigers ${captures} immediate capture${captures === 1 ? '' : 's'}`,
-    immediateCaptures: captures,
-    edge,
-  };
-};
+const describeMove = (move: Move): string => move.map(coordinate).join('-');
 
 const isPosition = (value: unknown): value is number =>
   Number.isInteger(value) && (value as number) >= 0 && (value as number) < 25;
@@ -173,17 +85,9 @@ interface JevChoice {
 }
 
 function jevChoices(request: JevRequest): JevChoice[] {
-  if (request.state.playerNum === 2) {
-    return request.possibleMoves.map((move) => ({
-      move,
-      description: describeMove(move),
-    }));
-  }
-
-  const latest = request.state.history[request.state.history.length - 1];
   return request.possibleMoves.map((move) => ({
     move,
-    description: goatChoiceInfo(move, latest).description,
+    description: describeMove(move),
   }));
 }
 
